@@ -1,0 +1,537 @@
+---
+title: "Downstream analysis"
+author: "Sydney Precision Bioinformatics Group"
+date: "18 June 2019"
+output:
+  html_document:
+    code_folding: show
+    fig_height: 12
+    fig_width: 12
+    toc: yes
+    number_sections: true
+    toc_depth: 3
+    toc_float: yes
+---
+
+# Introduction
+
+We have now preprocessed and merged our single cell data. The next step is to analyse the data for cell type identification, identification of marker genes and *et cetera*. We will focus on some simple steps of downstream analysis for single cell RNA-sequencing (scRNA-seq) data as shown below.
+
+1. [What are the cell types present in the dataset?](#q1)
+2. [What are these cell clusters?](#q2)
+3. [For a gene of interest, how can I visualise the gene expression distribution?](#q3)
+4. [What are the cell type composition in the data?](#q4)
+
+
+We will be using some of the functions we developed in our  `scdney` package. You may visit our package website for the vignette and further details about [`scdney`](https://sydneybiox.github.io/scdney/).
+
+
+## Loading packages
+
+```{r load downstream pkg,  warning=FALSE, message=FALSE}
+suppressPackageStartupMessages({
+  library(SingleCellExperiment)
+  library(SummarizedExperiment)
+  library(dplyr)
+  library(edgeR)
+  library(scdney)
+  library(mclust)
+  library(Rtsne)
+  library(parallel)
+  library(cluster)
+  library(ggplot2)
+  library(MAST)
+  library(viridis)
+  library(ggpubr)
+  library(plyr)
+  library(monocle)
+})
+
+theme_set(theme_classic(16))
+
+```
+
+
+## Loading data
+
+In the scMerge publication, we have merged [four mouse liver datasets](https://sydneybiox.github.io/scMerge/articles/case_study/Mouse_Liver_Data.html) together. This data is a bit too large for us to work with in this workshop, hence, we will take the merged data with all four datasets and subset ourselves to only the Su and Yang datasets. Some processings were performed in this data compare to the previous section, namely, the Megakaryocyte, Erythrocyte cells from the previous section are labelled as Hematopoietic cells in this section.
+
+
+```{r}
+# datapath = "./data/"
+datapath = "/home/data/"
+sce_scMerge = readRDS(paste0(datapath, "liver_scMerge.rds"))
+
+## We will subset Su et al. and Yang et al. datasets.
+ids = colData(sce_scMerge)$batch %in% c("GSE87795", "GSE90047")
+
+subset_data = sce_scMerge[,ids]
+
+lab = colData(subset_data)$cellTypes
+
+nCs = length(table(lab))
+
+mat = SummarizedExperiment::assay(subset_data, "scMerge")
+```
+
+
+```{r, fig.width=12, fig.height=6, message=FALSE, echo = FALSE}
+cell_data = colData(subset_data) %>%
+  as.data.frame() %>%
+  tibble::rownames_to_column("cell_name") %>%
+  dplyr::mutate(stage = stringr::str_sub(cell_name, 1, 3)) %>%
+  dplyr::group_by(cellTypes, stage, batch) %>%
+  dplyr::summarise(n = n()) %>%
+  dplyr::ungroup() %>%
+  tidyr::complete(cellTypes, stage, batch, fill = list(n = 0))
+
+cell_data %>%
+  ggplot(aes(x = stage, y = cellTypes, fill = n, label = n)) +
+  geom_tile() +
+  geom_text() +
+  facet_wrap(~batch) +
+  scale_fill_distiller(palette = "Blues", direction = 1) +
+  labs(title = "Number of cells split by batch, celltypes and stage")
+```
+
+
+
+
+
+
+# Q1. What are the cell types present in the dataset? {#q1}
+
+Typically, a single cell RNA-sequencing experiment does not come with labelled cell type information for individual cells. We will need to identify cell types of indivdual cells in our data with bioinformatics analysis.
+
+Before we identify the cell types in the dataset, we need to first identify how many distinct group of population we can find from our data. One common method to achieve this is a statistical technique called **clustering**. A clustering method will group similar samples (cells) together and partition samples that are different by comparing their feature information (gene expression).
+
+
+There are two components that ultimately determine the performance of a clustering method:
+
++ The **similarity metric** that determines if two cells are similar to each other, and
++ The **algorithm** itself that uses the similarity metric to perform the grouping operations.
+
+
+
+In our recent study, we found Pearson correlation to be the optimal similarity metric for comparing single cell RNA-seq data ( [*Kim et al., 2018*](https://academic.oup.com/bib/advance-article-abstract/doi/10.1093/bib/bby076/5077112?redirectedFrom=fulltext) ). Therefore in this workshop, we will utilise `scClust` in our `scdney` package, which implemented 2017 Nature methods clustering algorithm `SIMLR` with pearson correlation.
+
+
+## How many distinct group of population are there in my dataset?
+
+Typical clustering methods (except for some methods like hierarchical clustering) require users to specify number of distinct groups (`k`) to cluster from your data. In the context of this data, we can think of `k` as the the number of cell types.
+
+In an unsupervised setting, we do not know the exact number and therefore, in a practical setting, we should run clustering for various number of `k` and evaluate their clustering performance.
+
+**However**, due to the time limit of this workshop, we will only run the `scClust` clustering for `k = 6` as a demonstration and load a saved result with more values of `k` computed.
+
+```{r, warning = FALSE, eval = FALSE}
+## For demonstration purpose, we will run k = 6 (which is actually the number of cell types in our dataset)
+simlr_result_k6 = scClust(mat, 6, similarity = "pearson", method = "simlr", seed = 1, cores.ratio = 0, geneFilter = 0)
+
+load("data/simlr.results.RData")
+```
+
+
+[Extension] If you are interested, this is how you can compute `data/simlr.results.RData` by yourself.
+
+```{r, eval = FALSE}
+## We will NOT run for various `k` to save time. Instead, we will load pre-computed results for `k` between 3 to 8
+
+## This is an easy way to run `scClust` for k = 3, 4, 5, 6, 7, 8.
+all_k = 3:8
+simlr_results = sapply(as.character(all_k), function(k) {
+  scClust(mat, as.numeric(k), similarity = "pearson", method = "simlr", seed = 1, cores.ratio = 0, geneFilter = 0)
+}, USE.NAMES = TRUE, simplify = FALSE)
+```
+
+
+
+```{r, include = FALSE}
+## To make the knitting faster, we will load the precomputed results.
+load(paste0(datapath, "simlr.results.RData"))
+simlr_result_k6 = simlr_results$`6`
+```
+
+
+
+## How do we select optimal `k`?
+
+If our `k` is optimal, we should expect that the each cluster are closely packed together and the distances within the clusters, within-cluster sum of squares (WSS) are expected to be small. Thus, we will select the `k` with a small total WSS (compact clusters). This is called the "elbow" method.
+
+```{r, fig.height=6, fig.width=8}
+# Find total WSS from all cluster outputs
+all_wss = sapply(simlr_results, function(result) {
+  sum(result$y$withinss)
+}, USE.NAMES = TRUE, simplify = TRUE)
+
+plot_data = data.frame(
+  k = as.integer(names(all_wss)),
+  total_wss = all_wss
+)
+
+ggplot(plot_data,
+       aes(x = k,
+           y = total_wss)) +
+  geom_point(size = 3) +
+  stat_smooth(method = loess, col = "red",
+              method.args = list(degree = 1), se = FALSE) +
+  labs(title = "Compare Total WSS for each k",
+       y = "Total WSS")
+```
+
+
+
+As shown in this plot, the graph begin to plateau from `k` = 5. We can estimate that k is around 5 or 6. We can further investigate using silhouette scores or other metrics but using our t-SNE plot (this may require a bit of practical experience) we will estimate `k` = 6.
+
+<h4> <span class="glyphicon glyphicon-education" aria-hidden="true"></span> Quick quiz </h4>
+
+1. We can determine `k` with compactness of the clusters. What other measure can we use to determine `k`?
+2. How would you determine optimal number of clusters for hierarchical clustering?
+
+<!-- <i class="fi-lightbulb"></i> -->
+
+<h4> <span class="fi-lightbulb" aria-hidden="true"></span></h4>
+
+
+## Effect of similarity metrics
+
+For the purpose of demonstration, we would like to highlight the effect of similarity metric to your cluster output. We will first compute a t-SNE plot and then overlay that with
+
+  + Clustering result using Pearson correlation
+  + Clustering result using Euclidean distance
+  + True cell type labels from the publications
+
+
+```{r}
+## To run scClust with euclidean distance, uncommnet the following lines.
+## simlr_result_eucl_k6 = scClust(mat, 6, similarity = "euclidean", method = "simlr", seed = 1, cores.ratio = 0, geneFilter = 0)
+
+## for convenience, we will load our pre-computed result
+load(paste0(datapath, "simlr_result_eucl_k6.RData"))
+```
+
+
+
+```{r, fig.width=10, fig.height=5}
+# create tsne object
+set.seed(123)
+tsne_result = Rtsne(t(mat), check_duplicates = FALSE)
+#################################################
+tmp_lab = as.numeric(factor(lab))
+pear_cluster = plyr::mapvalues(
+  simlr_result_k6$y$cluster,
+  from = c(1,2,3,4,5,6),
+  to = c(2,3,1,4,6,5)
+)
+eucl_cluster = plyr::mapvalues(
+  simlr_result_eucl_k6$y$cluster,
+  from = c(1,2,3,4,5,6),
+  to = c(6,2,4,3,1,5)
+)
+#################################################
+
+plot_data = data.frame(
+  tsne1 = rep(tsne_result$Y[,1], 3),
+  tsne2 = rep(tsne_result$Y[,2], 3),
+  cluster = factor(c(tmp_lab, pear_cluster, eucl_cluster)),
+  label = rep(c("Truth", "Pearson", "Euclidean"), each = length(lab)))
+
+
+ggplot(plot_data, aes(x = tsne1, y = tsne2, colour = cluster)) +
+  geom_point(size = 2) +
+  labs(title = "t-SNE plot") +
+  facet_grid(~label) +
+  theme(legend.position = "none")
+```
+
+
+```{r, fig.width=10, fig.height=5}
+plot_data2 = data.frame(
+  Truth = lab,
+  computed_cluster = as.factor(c(pear_cluster, eucl_cluster)),
+  label = rep(c("Pearson", "Euclidean"), each = length(lab))
+)
+
+
+plot_data2 %>%
+  dplyr::group_by(Truth, computed_cluster, label) %>%
+  dplyr::summarise(n = n()) %>%
+  dplyr::ungroup() %>%
+  tidyr::complete(Truth, computed_cluster, label, fill = list(n = 0)) %>%
+  ggplot(aes(x = computed_cluster,
+             y = Truth,
+             fill = n, label = n)) +
+  geom_tile() +
+  geom_text() +
+  facet_wrap(~label) +
+  scale_fill_distiller(palette = "Blues", direction = 1) +
+  labs(title = "")
+```
+
+
+<h4> <span class="glyphicon glyphicon-education" aria-hidden="true"></span> Quick quiz </h4>
+
+1. From your observation of the above t-SNE plot, did our clustering method (with Pearson correlation) group cells well?
+
+
+**[Optional]** We can evaluate the clustering performance using the cell type labels providede from the publications.
+
+```{r, fig.height=5, fig.width=10}
+# ARI
+ari = c(mclust::adjustedRandIndex(lab, simlr_result_eucl_k6$y$cluster),
+        mclust::adjustedRandIndex(lab, simlr_result_k6$y$cluster))
+
+# NMI
+nmi = c(igraph::compare(as.numeric(factor(lab)),
+                        simlr_result_eucl_k6$y$cluster, method = "nmi"),
+        igraph::compare(as.numeric(factor(lab)),
+                        simlr_result_k6$y$cluster, method = "nmi"))
+
+plot_data = data.frame(
+  dist = rep(c("Euclidean", "Pearson"), 2),
+  value = c(ari, nmi),
+  eval = rep(c("ARI", "NMI"), each = 2)
+)
+
+ggplot(plot_data, aes(x = dist, y = value, fill = dist)) +
+  geom_bar(stat="identity") +
+  facet_grid(col = vars(eval)) +
+  labs(x = "Similarity metrics",
+       y = "Evalution score",
+       title = "Affect of similarity metrics in scRNA-seq data") +
+  theme(legend.position = "none")
+```
+
+
+
+# Q2. What are these cell clusters? {#q2}
+
+Now that we have clustered all the cells to 6 distinct groups, we may want to find out what these clusters are, i.e. what cell types are there in my dataset? Thus, we may ask what defines a cell type?
+
+We can use **marker genes** to identify cell types.
+
+## 2.1 What are the marker genes that distinguish the different cell types?
+
+Here we provide a function that allow one to find differentially expressed gene between a cluster and the remaining clusters. The input of this function is the expression matrix and the cluster ID. The output is a list of marker genes and their associated p-values.
+
+
+
+
+Here we provide an example of using the `findmarker` function.
+
+To find out the marker genes in cluster 4, we type in `4` in the `findmarker` function. We then look at the top 10 genes ranked by p-value. We can then use `ggplot` to visualise the distribution of one of the genes across the dataset.
+
+```{r, eval = FALSE}
+marker_cluster4 = findMarker(mat = mat,
+                             cluster = simlr_result_k6$y$cluster,
+                             cluster_id = 4)
+```
+
+
+```{r, include = FALSE}
+marker_cluster4 = readRDS(paste0(datapath, "marker_cluster4.rds"))
+```
+
+
+```{r}
+marker_cluster4[1:10, ]
+```
+
+
+```{r, message=FALSE, warning=FALSE}
+tsne_plotdf = data.frame(
+  tsne1 = tsne_result$Y[, 1],
+  tsne2 = tsne_result$Y[, 2]) %>%
+  dplyr::mutate(
+    cluster = as.factor(simlr_result_k6$y$cluster),
+    Gys2 = mat["Gys2", ])
+
+
+ggplot(data = tsne_plotdf, aes(x = tsne1, y = tsne2, colour = Gys2) ) +
+  geom_point(alpha = 0.5) +
+  scale_color_viridis() +
+  labs(col = "Gys2 expression", x = "tsne1", y = "tsne2")
+```
+
+
+
+
+
+<h4> <span class="glyphicon glyphicon-education" aria-hidden="true"></span> Quick quiz </h4>
+
+1. What does the above t-SNE plot tell you?
+
+1. Here we repeat the analysis as above, but for cluster 3. See if you can understand the output.
+
+```{r}
+marker_cluster3 = readRDS(paste0(datapath, "marker_cluster3.rds"))
+```
+
+```{r, message=FALSE, warning=FALSE}
+tsne_plotdf = tsne_plotdf %>%
+  dplyr::mutate(Erich5 = mat["Erich5",])
+
+ggplot(data = tsne_plotdf,
+       mapping = aes(x = tsne1, y = tsne2, colour = Erich5)) +
+  geom_point(alpha = 0.5) +
+  scale_color_viridis() +
+  labs(col="Erich5 expression")
+```
+
+
+
+
+# Q3. For a gene of interest, how can I visualise the gene expression distribution? {#q3}
+
+
+In Q2, we have identified some interesting marker genes from our dataset. If we have a gene that we know, and we want to identify the its expression pattern in our dataset, we can also visualise the distribution. For example, Hnf4a has been stated in literature as a marker gene for hepatoblast cell (citation).
+
+The figure on the left highlight cluster 4 and the figure on the right highlight the expression of Hnf4a.
+
+This suggests that cluster 4 could belong to hepatoblast cell.
+
+
+```{r, fig.height=6, fig.width=12}
+tsne_plotdf = tsne_plotdf %>%
+  dplyr::mutate(Hnf4a = mat["Hnf4a",])
+
+
+fig1 = ggplot(data = tsne_plotdf,
+              mapping = aes(x = tsne1, y = tsne2)) +
+  geom_point(aes(color = ifelse(cluster == 4, 'Yellow', 'Purple')), alpha = 0.5) +
+  scale_colour_viridis_d() +
+  labs(x = "",
+       y = "",
+       title = "Cluster 4") +
+  theme(legend.position = "none")
+
+
+fig2 = ggplot(data = tsne_plotdf,
+              mapping = aes(x = tsne1, y = tsne2, colour = Hnf4a) ) +
+  geom_point(alpha = 0.5) +
+  scale_color_viridis() +
+  labs(x = "",
+       y = "",
+       title = "Hnf4a expression pattern")
+
+ggarrange(fig1,fig2, ncol= 2, nrow = 1)
+```
+
+<h4> <span class="glyphicon glyphicon-education" aria-hidden="true"></span> Quick quiz </h4>
+
+See if you can understand the output of the following code.
+
+
+```{r, fig.height=6, fig.width=12}
+tsne_plotdf = tsne_plotdf %>%
+  dplyr::mutate(Epcam = mat["Epcam",])
+
+
+fig1 = ggplot(data = tsne_plotdf, mapping = aes(x = tsne1, y = tsne2) ) +
+  geom_point(aes(color = ifelse(cluster == 3, 'Yellow', 'Purple')), alpha = 0.5) +
+  scale_colour_viridis_d() +
+  labs(x = "",
+       y = "",
+       title = "Cluster 3") +
+  theme(legend.position = "none")
+
+
+fig2 = ggplot(data = tsne_plotdf,
+               mapping = aes(x = tsne1, y = tsne2, colour = Epcam) ) +
+  geom_point(alpha=0.5) +
+  scale_color_viridis() +
+  labs(x = "",
+       y = "",
+       title = "Epcam expression pattern")
+
+ggarrange(fig1,fig2, ncol= 2, nrow = 1)
+```
+
+
+As you may have already noticed from above steps, unsupervised clustering methods alone are not perfect in capturing cell type information. Using this step iteratively, we need to refine our cell type information.
+
+
+# Q4. What are the cell type composition in the data? {#q4}
+
+**NOTE:** From this step, we will assume we have correctly refined our cell type information from above steps and we will use the cell type information provided in Su et. al. 2017 and Yang et. al. 2017.
+
+## Cell type proportions
+
+```{r, fig.width = 10, fig.height=10}
+plot_data = data.frame(table(lab)) %>%
+  dplyr::mutate(lab = reorder(lab, Freq))
+
+ggplot(plot_data,
+       aes(x = lab,
+           y = Freq,
+           fill = lab)) +
+  geom_bar(stat = "identity") +
+  labs(x = "Cell types",
+       y = "Frequency",
+       title = "Composition of cell types") +
+  theme(legend.position = "none")
+```
+
+We observe that hepatoblast/hepatocyte is the largest population.
+
+
+# Extension: Any rare cell type? What is the most common cell type?
+
+# Extension: Monocle
+
+A popular question in scRNA-Seq analysis is if the gene expressions patterns changes over some time.
+
+The `monocle` method is a well-established psuedo-time trajectory reconstruction method from [Trapnell et. al. (2014)](https://www.nature.com/articles/nbt.2859). You can learn more about the theoretical construction of `monocle` here. In terms of computations, `monocle` requires some psuedo-time modelling on each gene and then markers are selected to perform psuedo-time ordering.
+
+The code below construct psuedo-time trajectory for the Hepatoblast/Hepatocyte cells in the merged data.
+
+```{r, message = FALSE, warning = FALSE}
+## Subsetting data to "hepatoblast/hepatocyte"
+monocle_data = subset_data[,colData(subset_data)$cellTypes %in% c("hepatoblast/hepatocyte")]
+## Add a "stage" column to the colData of the monocle_data
+colData(monocle_data)$stage = stringr::str_sub(colnames(monocle_data), 1, 3)
+table(colData(monocle_data)$stage)
+## monocle needs a rowData (data about each gene)
+rowData(monocle_data) = DataFrame(gene_short_name = rownames(monocle_data))
+monocle_data
+
+## moncole requires a `CellDataSet` object to run.
+## You can convert monocle_data into a `CellDataSet` object using the scran package.
+monocle_CellDataSet = scran::convertTo(
+  monocle_data,
+  type = "monocle",
+  assay.type = "scMerge"
+  # col.fields = c("cellTypes", "stage", "batch"),
+  # row.fields = c("gene_short_name")
+  ) %>%
+  estimateSizeFactors()
+
+## Performing differential gene test using "stage".
+diff_test_res = differentialGeneTest(
+  monocle_CellDataSet, fullModelFormulaStr = "~stage")
+
+## We will select the top genes to be used for clustering and
+## calculate dispersion (variability) parameters before constructing the trajectory
+ordering_genes = row.names(subset(diff_test_res, qval < 0.00001))
+length(ordering_genes)
+monocle_CellDataSet = setOrderingFilter(monocle_CellDataSet, ordering_genes)
+monocle_CellDataSet = estimateDispersions(monocle_CellDataSet) %>% suppressWarnings()
+# plot_ordering_genes(monocle_CellDataSet)
+
+## Construcing the trajectory
+monocle_CellDataSet = reduceDimension(monocle_CellDataSet,
+                                      max_components = 2,
+                                      method = 'DDRTree')
+monocle_CellDataSet = orderCells(monocle_CellDataSet)
+plot_cell_trajectory(monocle_CellDataSet, color_by = "stage")
+# monocle::plot_cell_clusters(monocle_CellDataSet)
+plot_genes_in_pseudotime(monocle_CellDataSet[c("Sarm1", "Gm38388"),], color_by = "stage")
+```
+
+
+
+# SessionInfo
+
+```{r}
+sessionInfo()
+```

@@ -1,0 +1,404 @@
+---
+title: "scMerge"
+author: "Sydney Precision Bioinformatics Group"
+date: "18 June 2019"
+output:
+  html_document:
+    code_folding: show
+    fig_height: 12
+    fig_width: 12
+    toc: yes
+    number_sections: true
+    toc_depth: 3
+    toc_float: yes
+---
+
+# Introduction 
+
+`scMerge` is a method developed by the Sydney Precision Bioinformatics Group. It aims to merge multiple scRNA-Seq data so that researchers can look for biological signals on data pooled from multiple data sources. The key to achieving a good merge is to remove the **noise** created by pooling data from multiple sources. 
+
+There are two key steps in `scMerge`: 
+
+1. identifying cells of similar cell types and pooling these cells together;
+2. using Stably Expressed Genes (SEGs) to identify the data noises and removing the noises from the data. 
+
+
+The ultimate result is a well-merged data where the cells are separated out by the biology but not the noise due to data sources. 
+
+
+
+# Loading in the packages
+
+
+```{r load scMerge pkg,  warning=FALSE, message=FALSE}
+library(scMerge)
+library(scater)
+library(dplyr)
+library(ggpubr)
+library(forcats)
+library(dplyr)
+library(tidyr)
+
+theme_set(theme_classic(16))
+```
+
+
+
+# The mouse liver data
+
+We will begin with merging two mouse liver datasets.
+
+This is perhaps a good place to clarify the terminology **data sources** and **batch**. In traditional transcriptomics analysis, the word **batch** means a large set of samples are processed by different technicians or sequenced on different dates etc. Our `scMerge` methodology not only corrects for the data noise created by this type of batches, but it can also correct for noises of unspecified origins e.g. noises created from multiple experiments with different biological questions in mind or noises from different protocols (see the table below). Hence, even though we may use these two terms interchangably, it is important to clarify that we are actually performing a more difficult task of merging from two different sources of data rather than simply correcting for batch effect within a single experiment.
+
+
+| Name  | ID       | Author | DOI or URL                | Protocol   | Organism | Tissue | # of cell types | # of cells | # of batches |
+|-------|----------|--------|---------------------------|------------|----------|--------|-----------------|------------|--------------|
+| Liver | GSE87795 | Su     | 10.1186/s12864-017-4342-x | SMARTer/C1 | Mouse    | Liver  | 6               |    389     | 6            |
+|       | GSE90047 | Yang   | 10.1002/hep.29353         | Smart-Seq2 |          |        | 2               |    448     | 2            |
+
+
+
+For the purpose of efficient data management, the bioinformatics community uses a `SingleCellExperiment` object to store single cell data. We have saved the Su and Yang data as two separate RDS files and we will read these data in first.
+
+Note: In the scMerge publication, we have merged [four mouse liver datasets](https://sydneybiox.github.io/scMerge/articles/case_study/Mouse_Liver_Data.html) together. This data is a bit too large for us to work with in this workshop, hence, we will only mearge the Su and Yang datasets.
+
+
+```{r}
+# datapath = "./data/"
+datapath = "/home/data/"
+
+su = readRDS(paste0(datapath, "sce_GSE87795.rds"))
+yang = readRDS(paste0(datapath,"sce_GSE90047.rds"))
+```
+
+
+
+
+
+## Combing the data into a singular object
+
+The `scMerge` package has a convenient function that combines multiple `SingleCellExperiment` objects into a single `SingleCellExperiment` object. We will first put the Su and Yang data into a `list` and then run the `sce_cbind` function from `scMerge`.
+
+
+```{r}
+sce_list = list(
+  su = su,
+  yang = yang
+)
+
+sce_list
+
+sce_combine = scMerge::sce_cbind(sce_list = sce_list,
+                                 method = "union",
+                                 colData_names = c("cellTypes", "stage"),
+                                 batch_names = c("Su", "Yang"))
+
+sce_combine
+```
+
+
+## Manipulating a `SingleCellExperiment` object
+
+You can learn more about `SingleCellExperiment` objects [here](http://bioconductor.org/packages/release/bioc/html/SingleCellExperiment.html). In brief terms, in a `SingleCellExperiment` object, it stores three things:
+
++ `colData` which stores information about the cells
++ `rowData` which stores infornatin about the genes
++ `assayData` which stores a matrix of single cell expression data
+
+In the Yang data, the cell type `Hepatoblast` is coded as `hepatoblast/hepatocyte`. In order to correct for this, we will briefly manipulate the `colData`. You do not need to know precise details of what is happening, please just copy and paste this code.
+
+```{r}
+table(
+  colData(sce_combine)$cellTypes,
+  colData(sce_combine)$batch
+)
+
+colData(sce_combine)$cellTypes = colData(sce_combine)$cellTypes %>%
+  forcats::fct_recode(Hepatoblast = "hepatoblast/hepatocyte") %>%
+  droplevels()
+
+sce_combine = sce_combine[rowSums(SingleCellExperiment::counts(sce_combine)) != 0,
+                          colSums(SingleCellExperiment::counts(sce_combine)) != 0]
+
+table(
+  colData(sce_combine)$cellTypes,
+  colData(sce_combine)$batch
+)
+```
+
+
+
+
+## Visualisation of the raw data
+
+There are three information about our cells in this data:
+
++ `cellTypes`: These are labelled cellTypes from the authors' publications. We will treat these labels as the ground truth in this workshop.
++ `batch`: This is simply an indication of whether a cell was sourced from the Su or Yang dataset.
++ `stage`: The day on which the cell was taken from the mouse.
+
+We will visualise all three columns using a heatmap plot as shown below.
+
+We see that the Hepatoblast cells are the only cell type common between the two data sources.
+
+```{r, fig.width=12, fig.height=6, message=FALSE, echo = FALSE}
+cell_data = colData(sce_combine) %>%
+  as.data.frame() %>%
+  dplyr::group_by(cellTypes, stage, batch) %>%
+  dplyr::summarise(n = n()) %>%
+  dplyr::ungroup() %>%
+  tidyr::complete(cellTypes, stage, batch, fill = list(n = 0)) %>%
+  dplyr::mutate(cellTypes = as.character(cellTypes))
+
+cell_data %>%
+  ggplot(aes(x = stage, y = cellTypes, fill = n, label = n)) +
+  geom_tile() +
+  geom_text() +
+  facet_wrap(~batch) +
+  scale_fill_distiller(palette = "Blues", direction = 1) +
+  labs(title = "Number of cells split by batch, celltypes and stage")
+```
+
+
+For a well-merged dataset, we should expect that the cells are grouped by the cell types rather than the batch/data sources. One way to check for this is via a PCA plot. The following code creates a PCA plot coloured by cell types and another coloured by batches. Pay special attention to the Hepatoblast cells (green in the left panel) since it is the only cell type that exists in both batches. Do you think the raw data is well-merged?
+
+```{r, fig.width=12, fig.height=6, message=FALSE}
+set.seed(1234)
+tsne_logcounts = sce_combine %>% 
+  scater::runTSNE(exprs_values = "logcounts")
+
+tsne_logcounts_cellTypes = 
+  tsne_logcounts %>% 
+  plotTSNE(colour_by = "cellTypes") +
+  scale_fill_brewer(palette = "Set1")
+
+
+tsne_logcounts_batch = 
+  tsne_logcounts %>% 
+  plotTSNE(colour_by = "batch") +
+  scale_fill_brewer(palette = "Dark2")
+
+ggpubr::ggarrange(tsne_logcounts_cellTypes, 
+                  tsne_logcounts_batch, ncol = 2, nrow = 1)
+```
+
+
+
+# 1. Supervised `scMerge`
+
+
+We will begin running `scMerge` with a simple example.
+
+Remember that one of our evaluation metric is to bring the Hepatoblast cells from these two batches to be closer to each other. The way that `scMerge` achieves this is to consider cells that are similar to each other to be **pseudo-replicates** of each other. In our example, that means we should consider Hepatoblast cells from the Su dataset to be pseudo-replicates of the Hepatoblast cells in the Yang dataset. Once this is established, we can consider the noise that exists between these two groups of Hepatoblast cells to be the noise that we should remove from the data. This noise is estimated from the Stably Expressed Genes (SEGs), which is a list of genes that we have found to be highly expressed and stable across multiple datasets. Ultimately, we remove this noise component from the data and arrive at a merged dataset.
+
+Other inputs of the `scMerge` function include
+
+
++ `sce_combine`: is a `SingleCellExperiment` object containing a column `batch` in its colData
++ `ctl`: An index of stably expressed genes
++ `cell_type`: Cell type information
++ `replicate_prop`: What is the proportion of cells to be used for finding pseudo-replicates
++ `assay_name`: The name of the merged data when stored in the output `SingleCellExperiment`
++ `verbose`: whether intermediate messages should be printed out
+
+
+
+
+```{r, fig.width=5, fig.height=5}
+data("segList_ensemblGeneID", package = "scMerge")
+
+scMerge_supervised = scMerge(
+  sce_combine = sce_combine,
+  ctl = which(rownames(sce_combine) %in% segList_ensemblGeneID$mouse$mouse_scSEG),
+  cell_type = sce_combine$cellTypes,
+  replicate_prop = 1,
+  assay_name = "scMerge_supervised",
+  verbose = TRUE)
+```
+
+
+
+The output of the `scMerge` function is a `SingleCellExperiment` object with one extra assay, `scMerge_supervised`. And we can check the PCA visualisation to see if the merge is sensible.
+
+
+
+```{r, fig.width=12, fig.height=6, message=FALSE}
+scMerge_supervised
+
+set.seed(1234)
+
+tsne_scMerge_supervised = scMerge_supervised %>% 
+  scater::runTSNE(exprs_values = "scMerge_supervised")
+
+tsne_scMerge_supervised_cellTypes = tsne_scMerge_supervised %>% 
+  scater::plotTSNE(colour_by = "cellTypes") +
+  scale_fill_brewer(palette = "Set1")
+
+tsne_scMerge_supervised_batch = tsne_scMerge_supervised %>% 
+  scater::plotTSNE(colour_by = "batch") +
+  scale_fill_brewer(palette = "Dark2")
+
+ggpubr::ggarrange(tsne_scMerge_supervised_cellTypes,
+                  tsne_scMerge_supervised_batch, ncol = 2, nrow = 1)
+```
+
+
+
+
+
+# 2. Unsupervised scMerge
+
+
+What if we do not have access to the cell type information? Can we still perform `scMerge`?
+
+The answer is yes! In the absence of true cell type information, `scMerge` will perform clustering in the background to assign the cells with cluster labels. These cluster labels closely mimick the true cell type labels and a similar merge performance can be attained.
+
+
+Below is the code for the unsupervised version of `scMerge`. Instead of supplying the `cell_type` parameter, we will use the `kmeansK` parameter. The `kmeansK` parameter should be a vector that matches the number of batches in our `sce_combine` data (in this case, 2). The first number in `kmeansK` should be the number of expected cell types in the first batch (Su) and the second number should be the number of expected cell types in the second batch. In our case, we already know from the data table that there are 6 and 2 celltypes in the Su and Yang data respectively, hence we should specify `kmeansK = c(6, 2)`.
+
+Note: in the case that you do not know what is a good guess of number of cell types, you should specify a slightly higher number.
+
+```{r, fig.width=5, fig.height=5}
+scMerge_unsupervised = scMerge(
+  sce_combine = sce_combine,
+  ctl = which(rownames(sce_combine) %in% segList_ensemblGeneID$mouse$mouse_scSEG),
+  kmeansK = c(6, 2),
+  replicate_prop = 1,
+  assay_name = "scMerge_unsupervised",
+  verbose = TRUE)
+```
+
+
+
+```{r, fig.width=12, fig.height=6, message=FALSE}
+scMerge_unsupervised
+
+set.seed(1234)
+tsne_scMerge_unsupervised = scMerge_unsupervised %>% 
+  scater::runTSNE(exprs_values = "scMerge_unsupervised")
+
+tsne_scMerge_unsupervised_cellTypes = tsne_scMerge_unsupervised %>% 
+  scater::plotTSNE(colour_by = "cellTypes") +
+  scale_fill_brewer(palette = "Set1")
+
+set.seed(1234)
+tsne_scMerge_unsupervised_batch = tsne_scMerge_unsupervised %>% 
+  scater::plotTSNE(colour_by = "batch") +
+  scale_fill_brewer(palette = "Dark2")
+
+ggpubr::ggarrange(tsne_scMerge_unsupervised_cellTypes, 
+                  tsne_scMerge_unsupervised_batch, ncol = 2, nrow = 1)
+```
+
+
+# Extension topics
+
+## Semi-supervised scMerge
+
+In any dataset, it is always a challenge to know what is the biological signal and what is noise. For example, in the context of this mouse liver data, we considered the variations between the Hepatoblast cells between the two batches as noise we wish to remove. However, we also know that these cells were sampled from different embryonic time points, so the variations between cells at different time points should be a biological signal that we would like to retain. In other words, we should consider cells of different cell types at different time points as pseudo-replicates.
+
+In `scMerge`, we say that the time points information is the "wanted variation" and this is achieved through the `WV` parameter. In addition, we can also supply known development markers to guide the retention of the time point signals. We call this the "semi-supervised" version of `scMerge`, since it uses some parts of the label information.
+
+```{r, fig.width=5, fig.height=5}
+scMerge_semisupervised = scMerge(
+  sce_combine = sce_combine,
+  ctl = which(rownames(sce_combine) %in% segList_ensemblGeneID$mouse$mouse_scSEG),
+  kmeansK = c(6, 2),
+  replicate_prop = 1,
+  WV = sce_combine$stage,
+  WV_marker = c("ENSMUSG00000045394","ENSMUSG00000054932","ENSMUSG00000045394"),
+  assay_name = "scMerge_semisupervised",
+  verbose = TRUE)
+```
+
+
+### Visualisation of semi-supervised scMerge
+
+```{r, fig.width=12, fig.height=6, message=FALSE}
+scMerge_semisupervised
+
+
+set.seed(1234)
+tsne_scMerge_semisupervised = scMerge_semisupervised %>% 
+  scater::runTSNE(exprs_values = "scMerge_semisupervised")
+
+tsne_scMerge_semisupervised_cellTypes = tsne_scMerge_semisupervised %>% 
+  scater::plotTSNE(colour_by = "cellTypes") +
+  scale_fill_brewer(palette = "Set1")
+
+
+set.seed(1234)
+tsne_scMerge_semisupervised_batch = tsne_scMerge_semisupervised %>% 
+  scater::plotTSNE(colour_by = "batch") +
+  scale_fill_brewer(palette = "Dark2")
+
+ggpubr::ggarrange(tsne_scMerge_semisupervised_cellTypes, 
+                  tsne_scMerge_semisupervised_batch, ncol = 2, nrow = 1)
+```
+
+
+
+
+We will now visualise the Hepatoblast cells in the unsupervised scMerge result and then in the semi-supervised scMerge result. We will again use the tSNE plot, but this time, we will highlight the time point information. Notice that in the unsupervised scMerge result (left panel), `scMerge` removed the time points variations because we didn't tell it that this is biological variations that we wish to retain.
+
+
+```{r, fig.width=12, fig.height=6, message=FALSE}
+set.seed(1234)
+
+tsne_scMerge_hept_unsupervised = scMerge_unsupervised[, scMerge_unsupervised$cellTypes == "Hepatoblast"] %>% 
+  scater::runTSNE(exprs_values = "scMerge_unsupervised") %>% 
+  scater::plotTSNE(colour_by = "stage") +
+  scale_fill_brewer(palette = "Set1")
+
+tsne_scMerge_hept_semisupervised = scMerge_semisupervised[, scMerge_semisupervised$cellTypes == "Hepatoblast"] %>% 
+  scater::runTSNE(exprs_values = "scMerge_semisupervised") %>% 
+  scater::plotTSNE(colour_by = "stage") +
+  scale_fill_brewer(palette = "Set1")
+
+ggpubr::ggarrange(tsne_scMerge_hept_unsupervised, tsne_scMerge_hept_semisupervised, ncol = 2, nrow = 1)
+```
+
+
+## Speeding up scMerge
+
+The second component of scMerge contains some intense computations. For a large dataset, this component is slow. In order to fix this, we have implemented fast computational approximations for this component. While the output is only an approximation, it is usually numerically similar to a full run of scMerge and it can be up to 10 times faster for a large dataset.
+
+```{r, eval = FALSE, fig.width=5, fig.height=5}
+scMerge_fast = scMerge(
+  sce_combine = sce_combine,
+  ctl = which(rownames(sce_combine) %in% segList_ensemblGeneID$mouse$mouse_scSEG),
+  cell_type = sce_combine$cellTypes,
+  replicate_prop = 1,
+  assay_name = "scMerge_fast",
+  verbose = TRUE,
+  fast_svd = TRUE,
+  rsvd_prop = 0.1)
+```
+
+
+
+```{r, eval = FALSE, fig.width=12, fig.height=6, message=FALSE}
+scMerge_fast
+
+set.seed(1234)
+tsne_scMerge_fast = scMerge_fast %>% 
+  scater::runTSNE(exprs_values = "scMerge_fast")
+
+tsne_scMerge_fast_cellTypes = tsne_scMerge_fast %>% 
+  scater::plotTSNE(colour_by = "cellTypes") +
+  scale_fill_brewer(palette = "Set1")
+
+tsne_scMerge_fast_batch = tsne_scMerge_fast %>% 
+  scater::plotTSNE(colour_by = "batch") +
+  scale_fill_brewer(palette = "Dark2")
+
+ggpubr::ggarrange(tsne_scMerge_fast_cellTypes, tsne_scMerge_fast_batch, ncol = 2, nrow = 1)
+```
+
+
+# Session Info
+
+```{r}
+sessionInfo()
+```
+

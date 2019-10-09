@@ -1,0 +1,24 @@
+---
+title: "Acknowledgement HKU workshop"
+author: "Sydney Precision Bioinformatics Group"
+date: "18 June 2019"
+output: html_document
+---
+
++ This workshop is funded by Single Cell Plus grant. 
+
++ [Dr. Kitty Lo](https://sydney.edu.au/science/people/kitty.lo.php) is employed by the Faculty of Science at the University of Sydney. 
+
++ [Mr. Kevin Wang](https://sydney.edu.au/science/people/kevin.wang.php) is funded by the Golden Jubilee Travel Grant from the Statistical Society of Australia.  
+
++ The workshop is developed/adviced from the following members of the Sydney Precision Bioinformatics Group (in alphabetical order)
+  
+    * [Ms. Yue Cao](https://sydney.edu.au/science/people/yue.cao.644.php)
+    * [Ms. Hani Kim](https://sydney.edu.au/science/people/hani.kim.916.php)
+    * [Mr. Taiyun Kim](https://sydney.edu.au/science/people/taiyun.kim.811.php)
+    * [Ms. Yingxin Lin](https://sydney.edu.au/science/people/yingxin.lin.562.php)
+    * [Dr. Kitty Lo](https://sydney.edu.au/science/people/kitty.lo.php)
+    * [Mr. Kevin Wang](https://sydney.edu.au/science/people/kevin.wang.php)
+    * [Prof. Jean Yang](https://sydney.edu.au/science/people/jean.yang.php)
+    * [Dr. Pengyi Yang](https://sydney.edu.au/science/people/pengyi.yang.php)
+

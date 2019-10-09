@@ -1,0 +1,20 @@
+# This file controls the layout of the website. 
+name: "SingleCellPlus"
+navbar:
+  title: "SingleCellPlus - HKU Workshop"
+  left:
+    - text: "Home"
+      href: index.html
+    - text: "QC Process"
+      href: qc.html
+    - text: "scMerge"
+      href: scMerge.html
+    - text: "Downstream Analysis"
+      href: downstream.html
+    - text: "Acknowledgement"
+      href: acknowledgement.html
+output_dir: "."
+output:
+  html_document:
+    theme: paper
+    highlight: textmate

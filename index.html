@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+<meta name="author" content="Sydney Precision Bioinformatics Group" />
+
+<meta name="date" content="2019-06-18" />
+
+<title>HKU workshop</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/paper.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 64px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 69px;
+  margin-top: -69px;
+}
+.section h2 {
+  padding-top: 69px;
+  margin-top: -69px;
+}
+.section h3 {
+  padding-top: 69px;
+  margin-top: -69px;
+}
+.section h4 {
+  padding-top: 69px;
+  margin-top: -69px;
+}
+.section h5 {
+  padding-top: 69px;
+  margin-top: -69px;
+}
+.section h6 {
+  padding-top: 69px;
+  margin-top: -69px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">SingleCellPlus - HKU Workshop</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="qc.html">QC Process</a>
+</li>
+<li>
+  <a href="scMerge.html">scMerge</a>
+</li>
+<li>
+  <a href="downstream.html">Downstream Analysis</a>
+</li>
+<li>
+  <a href="acknowledgement.html">Acknowledgement</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">HKU workshop</h1>
+<h4 class="author">Sydney Precision Bioinformatics Group</h4>
+<h4 class="date">18 June 2019</h4>
+
+</div>
+
+
+<div id="the-single-cell-plus-workshop" class="section level1">
+<h1>The Single Cell Plus Workshop</h1>
+<p>This workshop is part of a joint research initiative between Hong Kong University and the University of Sydney.</p>
+</div>
+<div id="aim-of-this-workshop" class="section level1">
+<h1>Aim of this workshop</h1>
+<p>In this workshop we will focus on two mouse liver datasets to illustrate three critical topics in single-cell RNA-Seq analysis.</p>
+<ol style="list-style-type: decimal">
+<li>Quality control of sc-RNASeq data,</li>
+<li>The <code>scMerge</code> package for integrating multiple sc-RNASeq data,</li>
+<li>Some possible downstream analysis after <code>scMerge</code>.</li>
+</ol>
+<p>At the end of this workshop you should have some basic understanding of scRNASeq data and some key computational and statistical challenges of this type of data.</p>
+</div>
+<div id="prerequisites" class="section level1">
+<h1>Prerequisites</h1>
+<p>Ideally, you should be somewhat familiar with <code>R</code>. However, if you haven’t used <code>R</code> before, don’t worry! This is not a programming workshop, you can still pick up important practical skills by running the codes we provided.</p>
+<p>Please try to download and install:</p>
+<ul>
+<li><code>R 3.6</code> from <a href="https://cloud.r-project.org/" class="uri">https://cloud.r-project.org/</a></li>
+<li><code>RStudio</code> from <a href="https://www.rstudio.com/products/rstudio/download/" class="uri">https://www.rstudio.com/products/rstudio/download/</a></li>
+</ul>
+</div>
+<div id="installation" class="section level1">
+<h1>Installation</h1>
+<p>You can find all the data and materials <a href="http://shiny.maths.usyd.edu.au/singlecellplus/SingleCellPlus_zip.zip">here</a>.</p>
+<p>You should be able to run the codes below in <code>R</code> to install all the packages needed in this workshop. If you encounter any problems. Please let one of the instructors know.</p>
+<pre class="r"><code>install.packages(&quot;BiocManager&quot;)
+BiocManager::install(c(&quot;scMerge&quot;, &quot;devtools&quot;, 
+                       &quot;DropletUtils&quot;, &quot;edgeR&quot;,
+                       &quot;ggpubr&quot;, &quot;MAST&quot;, 
+                       &quot;plyr&quot;, &quot;Rtsne&quot;, 
+                       &quot;scales&quot;, &quot;scater&quot;, 
+                       &quot;scran&quot;, &quot;tidyverse&quot;, 
+                       &quot;viridis&quot;), version = &quot;3.10&quot;)
+
+
+devtools::install_github(&quot;SydneyBioX/scdney&quot;)</code></pre>
+<div id="for-windows-users" class="section level2">
+<h2>For Windows users</h2>
+<p>If you could not run the last line of the above instructions, then please</p>
+<ol style="list-style-type: decimal">
+<li>Try to install <code>Rtools35</code> from <a href="https://cran.r-project.org/bin/windows/Rtools/" class="uri">https://cran.r-project.org/bin/windows/Rtools/</a>.</li>
+<li>Run <code>devtools::install_github("SydneyBioX/scdney")</code> again.</li>
+</ol>
+</div>
+<div id="for-mac-users" class="section level2">
+<h2>For Mac users</h2>
+<p>If you could not run the last line of the above instructions, then please</p>
+<ol style="list-style-type: decimal">
+<li>Try to install <code>gfortran-6.1</code> from <a href="https://cran.r-project.org/bin/macosx/tools/" class="uri">https://cran.r-project.org/bin/macosx/tools/</a>.</li>
+<li>Try the following code instead.</li>
+</ol>
+<pre class="r"><code>BiocManager::install(c(&quot;DescTools&quot;, &quot;amap&quot;, 
+                       &quot;doParallel&quot;, &quot;ggridges&quot;, 
+                       &quot;lme4&quot;, &quot;mice&quot;, 
+                       &quot;methods&quot;, &quot;caret&quot;, 
+                       &quot;randomForest&quot;, &quot;clusteval&quot;, 
+                       &quot;dendextend&quot;, &quot;gmodels&quot;, 
+                       &quot;e1071&quot;), version = &quot;3.10&quot;)
+
+install.packages(&quot;https://github.com/SydneyBioX/scdney/releases/download/V0.1.4/scdney_0.1.4.tgz&quot;, repos = NULL)</code></pre>
+</div>
+</div>
+<div id="clipboard" class="section level1">
+<h1>Clipboard</h1>
+<p>In some circumstances, we might need to share codes that are not currently a part of the existing materials. Please click <a href="https://docs.google.com/document/d/136YffzxjkUM8RIGsnjD_yOkCTWw4Ijdwjy4_58nC-zc/edit?usp=sharing">here</a> to access these codes.</p>
+</div>
+<div id="references" class="section level1">
+<h1>References</h1>
+<p><strong>Methodologies</strong></p>
+<ol style="list-style-type: decimal">
+<li><p><a href="http://www.pnas.org/lookup/doi/10.1073/pnas.1820006116">scMerge leverages factor analysis, stable expression, and pseudoreplication to merge multiple single-cell RNA-seq datasets</a>, Proceedings of the National Academy of Sciences, United States of America, 2019. Yingxin Lin, Shila Ghazanfar, Kevin Y.X. Wang, Johann A. Gagnon-Bartsch, Kitty K. Lo, Xianbin Su, Ze-Guang Han, John T. Ormerod, Terence P. Speed, Pengyi Yang, Jean Y. H. Yang.</p></li>
+<li><p><a href="https://www.biorxiv.org/content/biorxiv/early/2018/11/22/229815.full.pdf">Evaluating stably expressed genes in single cells</a> (Under review). Yingxin Lin, Shila Ghazanfar, Dario Strbenac, Andy Wang, Ellis Patrick, Dave Lin, Terence Speed, Jean Y. H. Yang, Pengyi Yang.</p></li>
+<li><p><a href="https://doi.org/10.1093/bib/bby076">Impact of similarity metrics on single-cell RNA-seq data clustering</a>, Briefings in Bioinformatics, 2018. Taiyun Kim, Irene Rui Chen, Yingxin Lin, Andy Y. Y. Wang, Jean Y. H. Yang, Pengyi Yang.</p></li>
+</ol>
+<p><strong>Data</strong></p>
+<ol style="list-style-type: decimal">
+<li><p><a href="https://doi.org/10.1186/s12864-017-4342-x">Single-cell RNA-Seq analysis reveals dynamic trajectories during mouse liver development</a>, BMC Genomics, 2017. Xianbin Su, Yi Shi, Xin Zou, Zhao-Ning Lu, Gangcai Xie, Jean Y. H. Yang, Chong-Chao Wu, Xiao-Fang Cui, Kun-Yan He, Qing Luo, Yu-Lan Qu, Na Wang, Lan Wang, Ze-Guang Han.</p></li>
+<li><p><a href="https://doi.org/10.1002/hep.29353">A single‐cell transcriptomic analysis reveals precise pathways and regulatory mechanisms underlying hepatoblast differentiation</a>, Hepatology, 2017. Li Yang, Wei‐Hua Wang, Wei‐Lin Qi, Zhen Guo, Erfei Bi, Cheng‐Ran Xu.</p></li>
+</ol>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Sydney Precision Bioinformatics Group" />
+
+<meta name="date" content="2019-06-18" />
+
+<title>QC of single cell data</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/paper.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 64px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 69px;
+  margin-top: -69px;
+}
+.section h2 {
+  padding-top: 69px;
+  margin-top: -69px;
+}
+.section h3 {
+  padding-top: 69px;
+  margin-top: -69px;
+}
+.section h4 {
+  padding-top: 69px;
+  margin-top: -69px;
+}
+.section h5 {
+  padding-top: 69px;
+  margin-top: -69px;
+}
+.section h6 {
+  padding-top: 69px;
+  margin-top: -69px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">SingleCellPlus - HKU Workshop</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="qc.html">QC Process</a>
+</li>
+<li>
+  <a href="scMerge.html">scMerge</a>
+</li>
+<li>
+  <a href="downstream.html">Downstream Analysis</a>
+</li>
+<li>
+  <a href="acknowledgement.html">Acknowledgement</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+<div class="btn-group pull-right">
+<button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+</ul>
+</div>
+
+
+
+<h1 class="title toc-ignore">QC of single cell data</h1>
+<h4 class="author">Sydney Precision Bioinformatics Group</h4>
+<h4 class="date">18 June 2019</h4>
+
+</div>
+
+
+<div id="introduction" class="section level1">
+<h1><span class="header-section-number">1</span> Introduction</h1>
+<p>One of the first steps in single-cell RNA-seq analysis is to perform a quality check of the data we have sequenced in an experiment. This process is a necessary step before we proceed to data merging and other downstream data analyses. There are multiple quality control (QC) tools for sequencing data that we can use for both bulk and single-cell RNA-seq data. Here, we will look at some QC measures and generate a report on the quality of our single-cell data.</p>
+<div id="load-in-packages" class="section level2">
+<h2><span class="header-section-number">1.1</span> Load in packages</h2>
+<p>Load in packages required to generate the QC plots.</p>
+<pre class="r"><code>library(DropletUtils)
+library(dplyr)
+library(ggplot2)
+library(scales)
+library(ggpubr)
+library(stringr)
+library(forcats)
+
+theme_set(theme_classic(16))</code></pre>
+</div>
+</div>
+<div id="the-mouse-liver-dataset-su-et-al.-2017" class="section level1">
+<h1><span class="header-section-number">2</span> The mouse liver dataset (Su et al. 2017)</h1>
+<p>For demonstration purpose, we will perform some QC checks on a single-cell mouse liver dataset generated by Su et al. (2017). This liver dataset contains 507 cells at seven developmental stages between embryonic day 11.5 and postnatal day 2.5. The cells were sequenced using the Fluidigm C1 platform and the reads are paired end. The file containing the raw count matrix is located in the <code>data</code> folder in the zip file you have downloaded as <code>GSE87795_counts.csv</code>.</p>
+<p>The dataset of read counts is stored in a <code>csv</code> file (which is simply an Excel file). We can load the data into R using the <code>read.csv()</code> function. Here, we will use two options:</p>
+<ul>
+<li><code>header = TRUE</code> means that we will take the first row of the file as the column names.</li>
+<li><code>row.names = 1</code> means that we will take the first column of the file as the row names.</li>
+</ul>
+<pre class="r"><code>datapath = &quot;./data/&quot;
+# datapath = &quot;/home/data/&quot;
+liver = read.csv(file = paste0(datapath, &quot;GSE87795_counts.csv&quot;),
+                 header = TRUE,
+                 row.names = 1)</code></pre>
+<p>First, let’s check some basics of this data. This dataset contains 51918 rows and 507 columns. Each row corresponds to a gene, and each column corresponds to a cell. The first five rows and five columns of the dataset can be shown using <code>liver[1:5, 1:5]</code>.</p>
+<pre class="r"><code>dim(liver)</code></pre>
+<pre><code>## [1] 51918   507</code></pre>
+<pre class="r"><code>liver[1:5, 1:5]</code></pre>
+<pre><code>##                    E11.5_C01 E11.5_C03 E11.5_C05 E11.5_C06 E11.5_C07
+## ENSMUSG00000102693         0         0         0         0         0
+## ENSMUSG00000064842         0         0         0         0         0
+## ENSMUSG00000051951         0         0         0         0         0
+## ENSMUSG00000102851         0         0         0         0         0
+## ENSMUSG00000103377         0         0         0         0         0</code></pre>
+<p>Notice that the column names of this data contain information regarding the developmental stage of each cell when it was sequenced duing the experiment. We can clean up this information using a short line of code.</p>
+<p>With some code, we can produce a frequency table of the number of cells at each developmental stage.</p>
+<pre class="r"><code>stage = str_split(colnames(liver), &quot;_&quot;) %&gt;%
+  sapply(&quot;[[&quot;, 1)
+
+table(stage)</code></pre>
+<pre><code>## stage
+## E11.5 E12.5 E13.5 E14.5 E16.5 E18.5  P2.5 
+##    70   100    71    99    78    58    31</code></pre>
+<div id="a-quick-pre-processing-of-the-matrix" class="section level2">
+<h2><span class="header-section-number">2.1</span> A quick pre-processing of the matrix</h2>
+<p>A simple way to make single-cell datasets manageable for analysis is to remove genes that are not expressed in any cells (i.e. genes that have zero counts across all cells). Since these genes do not containn any measurable signals, removing them does not affect the downstream analysis. In addition, a smaller dataset actually improves the performance and speed of most algorithms.</p>
+<pre class="r"><code>liver = liver[rowSums(liver) != 0, ]
+dim(liver)</code></pre>
+<pre><code>## [1] 37766   507</code></pre>
+<p>Here, we first used <code>rowSums(liver)</code> to calculate the total counts for each gene across all cells. <code>rowSums(liver) != 0</code> then looks for those genes that are <em>not equal</em> (represented by the <code>!=</code> symbol) zeroes. And then we will subset only those rows in the data (remember, rows of the data are genes) that are not purely zeroes using the square brackets <code>[,]</code>.</p>
+<h4>
+<span class="glyphicon glyphicon-education" aria-hidden="true"></span> Quick quiz
+</h4>
+<ol style="list-style-type: decimal">
+<li>How many genes do we have now?</li>
+<li>Did we lose any cells (columns)?</li>
+</ol>
+</div>
+</div>
+<div id="qc1-waterfall-plot" class="section level1">
+<h1><span class="header-section-number">3</span> QC1: Waterfall plot</h1>
+<p>The waterfall plot shows the log-count against the log-rank of each barcode. The barcodes are ranked based on the number of count each barcode has. We will compute these statistics using the <code>barcodeRanks</code> function from the <code>DropletUtils</code> package. And then we will extra the statistics and perform some plotting using the <code>ggplot2</code> package.</p>
+<p>The waterfall plots show two points of interest:</p>
+<ul>
+<li><strong>inflection point</strong> is the point on the curve where the first derivative is minimised</li>
+<li><strong>knee point</strong> is the point where the signed curvature is minimised</li>
+</ul>
+<p>These two points potentially indicate empty droplets (background barcodes). To elaborate on this concept, it is helpful to know that for microfluidic sequencing systems each droplet contains a bead and each bead are marked uniquely with a barcode. Intuitively, we can consider a droplet and the barcode associated with it as being a unique cell. Due to the technology, however, sometimes the droplet don’t always contain a cell, or it might contain multiples cells. We can now use the waterfall plot to detect those empty droplets. The barcodes with the number of counts dropping rapidly beyond knee point may suggest empty reads.</p>
+<pre class="r"><code>barcode = DropletUtils::barcodeRanks(liver)
+barcode_data = as.data.frame(barcode)
+
+barcode_points = data.frame(
+  type = c(&quot;inflection&quot;, &quot;knee&quot;),
+  value = c(barcode@metadata$inflection, barcode@metadata$knee))
+
+
+ggplot(data = barcode_data, aes(x = rank, y = total)) +
+  geom_point() +
+  geom_hline(data = barcode_points,
+             aes(yintercept = value,
+                 colour = type), linetype = 2) +
+  scale_x_log10(breaks = trans_breaks(&quot;log10&quot;, function(x) 10^x),
+                labels = trans_format(&quot;log10&quot;, math_format(10^.x))) +
+  scale_y_log10(breaks = trans_breaks(&quot;log10&quot;, function(x) 10^x),
+                labels = trans_format(&quot;log10&quot;, math_format(10^.x))) +
+  labs(title = &quot;Waterfall plot of read counts (log)&quot;,
+       x = &quot;Log Rank&quot;,
+       y = &quot;Log counts&quot;)</code></pre>
+<p><img src="qc_files/figure-html/unnamed-chunk-5-1.png" width="768" /></p>
+<h4>
+<span class="glyphicon glyphicon-education" aria-hidden="true"></span> Quick quiz
+</h4>
+<p>Based on the waterfall plot, should we filter out any cells?</p>
+</div>
+<div id="qc2-library-size" class="section level1">
+<h1><span class="header-section-number">4</span> QC2: Library size</h1>
+<p>Next, we can evaluate the total library size, that is the total read counts per cell. The library size may be used as an indicator of sequencing depth and it is a typical diagnostic for RNA-Seq data (for both the bulk and singl-cell type).</p>
+<p>A small library size for a cell may suggest abnormalies and lack of captured signals. In such a case, the cells with usually small library size should be removed.</p>
+<p>We will begin with a <code>data.frame</code> capturing the characteristics of each column <code>cell_plotdf_full</code> and then perform plotting with <code>ggplot2</code>. This <code>cell_plotdf_full</code> has four columns:</p>
+<ol style="list-style-type: decimal">
+<li><code>cell_name</code>: The name of each cell in the data</li>
+<li><code>stage</code>: The developmental time stage of each cell.</li>
+<li><code>library</code>: The total number of read counts for a cell.</li>
+<li><code>num_genes</code>: The total number of non-zero measurements for a cell. i.e. Number of genes expressed in a cell.</li>
+</ol>
+<p>For the ease of visualisation, we will subset our <code>cell_plotdf_full</code> to only those cells in the 11.5, 12.5 and 13.5 development stage. Then, we will also calculate the mean of <code>library</code> and <code>num_genes</code> for <em>each</em> development stage.</p>
+<pre class="r"><code>cell_plotdf_full = data.frame(
+  cell_name = colnames(liver),
+  stage = stage,
+  library = colSums(liver),
+  num_genes = colSums(liver != 0)
+)
+
+head(cell_plotdf_full)</code></pre>
+<pre><code>##           cell_name stage library num_genes
+## E11.5_C01 E11.5_C01 E11.5 1850822     11392
+## E11.5_C03 E11.5_C03 E11.5 2638215      8699
+## E11.5_C05 E11.5_C05 E11.5 3011095      9648
+## E11.5_C06 E11.5_C06 E11.5 1995783     10814
+## E11.5_C07 E11.5_C07 E11.5 3690986     10825
+## E11.5_C09 E11.5_C09 E11.5 2264731      6489</code></pre>
+<pre class="r"><code>cell_plotdf = cell_plotdf_full %&gt;%
+ dplyr::filter(stage %in% c(&quot;E11.5&quot;, &quot;E12.5&quot;, &quot;E13.5&quot;))
+
+
+cell_plotdf_mean = cell_plotdf %&gt;%
+  dplyr::group_by(stage) %&gt;%
+  dplyr::summarise(library_mean = mean(library),
+                   num_genes_mean = mean(num_genes))
+
+
+cell_plotdf_mean</code></pre>
+<pre><code>## # A tibble: 3 x 3
+##   stage library_mean num_genes_mean
+##   &lt;fct&gt;        &lt;dbl&gt;          &lt;dbl&gt;
+## 1 E11.5     2838642.          9262.
+## 2 E12.5     3094663.          9346.
+## 3 E13.5     3639297.          9813.</code></pre>
+<pre class="r"><code>ggplot(cell_plotdf,
+       aes(x = library/1e6, colour = stage, fill = stage)) +
+  geom_histogram(aes(y = ..density..), colour = &quot;black&quot;, fill = &quot;white&quot;, bins = 30) +
+  geom_density(alpha = 0.4) +
+  geom_vline(data = cell_plotdf_mean,
+             aes(xintercept = library_mean/1e6),
+             colour = &quot;blue&quot;, linetype = &quot;dashed&quot;, size = 1.5) +
+  # scale_x_continuous(breaks = 1:6) +
+  labs(title = &quot;Histogram of library size&quot;,
+       x = &quot;library size (in millions)&quot;,
+       y = &quot;density&quot;) +
+  facet_wrap(~ stage, ncol = 3)</code></pre>
+<p><img src="qc_files/figure-html/unnamed-chunk-6-1.png" width="768" /></p>
+<p>When we compare the distribution of librarzy size for all cells at three developmental stages, we can see that mean library size is lowest in E11.5 cells (mean = 2.838642 million) and highest in E13.5 cells (mean = 3.639297 million). E12.5 cells (mean = 3.094663 million) have a greater distribution of cells with few reads. Cells with very few reads are likely to have failed to capture the transcriptome of a cell, and thus should be filtered.</p>
+</div>
+<div id="qc3-number-of-uniquely-expressed-genes" class="section level1">
+<h1><span class="header-section-number">5</span> QC3: Number of uniquely expressed genes</h1>
+<p>Closely related to the idea of a library size is the number of uniquly expressed genes. In addition to sequencing depth, we can also filter for cells that express genes with sufficiently good coverage of the transcriptome. This is to ensure that we capture cells with not only sufficient reads but also those that have reads that are relatively evenly distributed across the transcriptome. To this end, we measure the number of uniquely expressed genes in individual cells.</p>
+<pre class="r"><code>ggplot(cell_plotdf,
+       aes(x = num_genes/1000, colour = stage, fill = stage)) +
+  geom_histogram(aes(y = ..density..), colour = &quot;black&quot;, fill = &quot;white&quot;, bins = 30) +
+  geom_density(alpha = 0.4) +
+  geom_vline(data = cell_plotdf_mean,
+             aes(xintercept = num_genes_mean/1000),
+             colour = &quot;blue&quot;, linetype = &quot;dashed&quot;, size = 1.5) +
+  labs(title = &quot;Histogram of number of unique genes expressed&quot;,
+       x = &quot;Number of unique genes expressed (in thousands)&quot;,
+       y = &quot;density&quot;) +
+  facet_wrap(~ stage, ncol = 3)</code></pre>
+<p><img src="qc_files/figure-html/unnamed-chunk-7-1.png" width="768" /></p>
+<p>From above, we can see that most cells have between 9000-10,000 detected genes. This is roughly the amount expected for high-depth scRNA-seq; however, the expected value may vary between experimental protocols, sequencing depth, and cell type used. Note that, unlike library size, a “heavy tail” can be observed for each of the distribution, indicating an unequal detection of genes across populations. Filtering out cells with low number of genes identified is another way to improve the quality of the dataset.</p>
+</div>
+<div id="qc4-mitochondrial-gene-expression" class="section level1">
+<h1><span class="header-section-number">6</span> QC4: Mitochondrial gene expression</h1>
+<p>Unhealthy or dying cells are associated with high expression of mitochondrial genes, and thus the proportion of mitochondrial expression is commonly used as a quality metric.</p>
+<pre class="r"><code>mito_genes &lt;- c(&quot;ENSMUSG00000064336&quot;, &quot;ENSMUSG00000064337&quot;, &quot;ENSMUSG00000064338&quot;, &quot;ENSMUSG00000064339&quot;, &quot;ENSMUSG00000064340&quot;, &quot;ENSMUSG00000064341&quot;, &quot;ENSMUSG00000064342&quot;, &quot;ENSMUSG00000064343&quot;, &quot;ENSMUSG00000064344&quot;, &quot;ENSMUSG00000064345&quot;, &quot;ENSMUSG00000064346&quot;, &quot;ENSMUSG00000064347&quot;, &quot;ENSMUSG00000064348&quot;, &quot;ENSMUSG00000064349&quot;, &quot;ENSMUSG00000064350&quot;, &quot;ENSMUSG00000064351&quot;, &quot;ENSMUSG00000064352&quot;, &quot;ENSMUSG00000064353&quot;, &quot;ENSMUSG00000064354&quot;, &quot;ENSMUSG00000064355&quot;, &quot;ENSMUSG00000064356&quot;, &quot;ENSMUSG00000064357&quot;, &quot;ENSMUSG00000064358&quot;, &quot;ENSMUSG00000064359&quot;, &quot;ENSMUSG00000064360&quot;, &quot;ENSMUSG00000064361&quot;, &quot;ENSMUSG00000065947&quot;, &quot;ENSMUSG00000064363&quot;, &quot;ENSMUSG00000064364&quot;, &quot;ENSMUSG00000064365&quot;, &quot;ENSMUSG00000064366&quot;, &quot;ENSMUSG00000064367&quot;, &quot;ENSMUSG00000064368&quot;, &quot;ENSMUSG00000064369&quot;, &quot;ENSMUSG00000064370&quot;, &quot;ENSMUSG00000064371&quot;, &quot;ENSMUSG00000064372&quot;, &quot;ENSMUSG00000096105&quot;)
+
+
+liver_mito = liver[mito_genes, ]
+
+mito_plotdf_full = data.frame(
+  cell_name = colnames(liver_mito),
+  stage = stage,
+  mito_percent = colSums(liver_mito)/colSums(liver) * 100
+)
+
+mito_plotdf = mito_plotdf_full %&gt;% dplyr::filter(stage %in% c(&quot;E11.5&quot;, &quot;E12.5&quot;, &quot;E13.5&quot;))
+
+mito_plotdf_mean = mito_plotdf %&gt;%
+  group_by(stage) %&gt;%
+  dplyr::summarise(mito_percent_mean = mean(mito_percent))
+
+mito_plotdf_mean</code></pre>
+<pre><code>## # A tibble: 3 x 2
+##   stage mito_percent_mean
+##   &lt;fct&gt;             &lt;dbl&gt;
+## 1 E11.5              7.61
+## 2 E12.5              6.99
+## 3 E13.5              5.35</code></pre>
+<pre class="r"><code>g1 = ggplot(mito_plotdf,
+       aes(x = mito_percent, colour = stage, fill = stage)) +
+  geom_histogram(aes(y = ..density..), colour = &quot;black&quot;, fill = &quot;white&quot;, bins = 30) +
+  geom_density(alpha = 0.4) +
+  geom_vline(data = mito_plotdf_mean,
+             aes(xintercept = mito_percent_mean),
+             colour = &quot;blue&quot;, linetype = &quot;dashed&quot;, size = 1.5) +
+  labs(x = &quot;Mitochondrial percentage&quot;,
+       y = &quot;Density&quot;) +
+  facet_wrap(~ stage, nrow = 3)
+
+
+g2 = ggplot(mito_plotdf,
+            aes(x = stage,
+                y = mito_percent,
+                fill = stage)) +
+  geom_violin(alpha = 0.8, draw_quantiles = 0.5) +
+  labs(y = &quot;Mitochondrial percentage&quot;)
+
+ggpubr::ggarrange(g1, g2, ncol=  2, common.legend = TRUE, legend = &quot;right&quot;)</code></pre>
+<p><img src="qc_files/figure-html/unnamed-chunk-8-1.png" width="960" /></p>
+<p>Filtering cells with greater than 10% of mitochondrial gene expression would remove cells that have abnormally high mitochondrial gene expression.</p>
+<h4>
+<span class="glyphicon glyphicon-education" aria-hidden="true"></span> Quick quiz
+</h4>
+<ol style="list-style-type: decimal">
+<li>Based on the figure above, would you say most cells are unhealthy or healthy?</li>
+<li>How does the percentage of mitochondrial gene expression change over time point?</li>
+</ol>
+</div>
+<div id="qc5-contribution-by-the-top-50-expressed-genes" class="section level1">
+<h1><span class="header-section-number">7</span> QC5: Contribution by the top 50 expressed genes</h1>
+<p>As well as the above metrics, it is often instructive to know the proportions of the reads consumed by the top 50 expressed genes. Moreover, an assessment of the top gene list before and after filtering can give you a good indication of whether the filtering has been successful, as the top genes are often occupied by mitochondrial genes from unhealthy cells.</p>
+<p>We can calculate the top 50 expressed genes for all cells as shown below.</p>
+<pre class="r"><code>## We will go to each column of the matrix, and divide the column by its sum
+## and convert this into a percentage.
+## The result is a matrix with each column that sum up to 100%.
+liver_percent = sweep(liver, 2, STATS = colSums(liver), FUN = &quot;/&quot;) * 100
+
+liver_percent %&gt;% colSums %&gt;% head</code></pre>
+<pre><code>## E11.5_C01 E11.5_C03 E11.5_C05 E11.5_C06 E11.5_C07 E11.5_C09 
+##       100       100       100       100       100       100</code></pre>
+<pre class="r"><code>liver_percent_meanEachGene = rowMeans(liver_percent)
+
+top50Genes = liver_percent_meanEachGene %&gt;% sort(decreasing = TRUE) %&gt;% head(50) %&gt;% names
+
+
+liver_percent_plotdf = liver_percent[top50Genes, ] %&gt;%
+  as.matrix %&gt;%
+  reshape2::melt(varnames = c(&quot;gene_name&quot;, &quot;cell_name&quot;),
+                 value.name = &quot;percent&quot;) %&gt;%
+  dplyr::mutate(gene_name = fct_reorder(gene_name, percent, mean))
+
+liver_percent_plotdf %&gt;%
+  ggplot(aes(x = gene_name, y = percent, colour = gene_name)) +
+  geom_violin() +
+  geom_jitter(alpha = 0.2) +
+  coord_flip() +
+  labs(x = &quot;percent of library&quot;,
+       y = &quot;genes&quot;,
+       title = &quot;Top 50 genes for all cell stages&quot;) +
+  theme(legend.position = &quot;none&quot;)</code></pre>
+<p><img src="qc_files/figure-html/unnamed-chunk-9-1.png" width="768" /></p>
+<p>The plot above show that there are three spike-in genes within the top 50 genes. The presence of multiple spike-ins at the top of the list may suggest that the concentration of spike-ins added to the experiment may need to be optimized for subsequent experiments. Overall, the relatively flat distributions indicate good coverage of the transcriptome.</p>
+<p>Alternatively, we can calculate the top 50 expressed genes for each stage, but we will leave this as an extension exercise.</p>
+<pre class="r"><code>liver_percent_split = split.data.frame(x = t(liver_percent), f = stage) %&gt;% lapply(t)
+
+liver_percent_split_meanEachGene = liver_percent_split %&gt;% lapply(rowMeans)
+
+
+e115_top50 = liver_percent_split_meanEachGene$E11.5 %&gt;% sort(decreasing = TRUE) %&gt;% head(50) %&gt;% names
+
+e115_liver_percent = liver_percent[e115_top50, stage == &quot;E11.5&quot;] %&gt;%
+  as.matrix %&gt;%
+  reshape2::melt(varnames = c(&quot;gene_name&quot;, &quot;cell_name&quot;),
+                 value.name = &quot;percent&quot;) %&gt;%
+  dplyr::mutate(gene_name = fct_reorder(gene_name, percent, mean))
+
+e115_liver_percent %&gt;%
+  ggplot(aes(x = gene_name, y = percent, colour = gene_name)) +
+  geom_violin() +
+  geom_jitter(alpha = 0.2) +
+  coord_flip() +
+  labs(x = &quot;genes&quot;,
+       y = &quot;percent of library&quot;,
+       title = &quot;Top 50 expressed genes for E11.5 cells&quot;) +
+  theme(legend.position = &quot;none&quot;)</code></pre>
+<p><img src="qc_files/figure-html/unnamed-chunk-10-1.png" width="768" /></p>
+<!-- ```{r} -->
+<!-- liver.percent.melt = liver.percent %>% -->
+<!--   as.matrix %>%  -->
+<!--   reshape2::melt(varnames = c("gene.name", "cell.name"), value.name = "percent") %>%  -->
+<!--   dplyr::mutate(stage = str_split(cell.name, "_") %>% sapply("[[", 1))  -->
+<!-- e115.percent = liver.percent.melt %>%  -->
+<!--   dplyr::filter(stage == "E11.5") %>%  -->
+<!--   dplyr::mutate(gene.name = forcats::fct_reorder(gene.name, percent, mean, .desc = TRUE)) %>%  -->
+<!--   dplyr::filter(as.integer(gene.name) <= 50) -->
+<!-- e115.percent %>%  -->
+<!--   ggplot(aes(x = fct_rev(gene.name), y = percent, colour = gene.name)) + -->
+<!--   geom_violin() + -->
+<!--   geom_jitter(alpha = 0.2) + -->
+<!--   coord_flip() + -->
+<!--   labs(x = "percent",  -->
+<!--        y = "") -->
+<!--   theme(legend.position = "none") -->
+<!-- ``` -->
+</div>
+<div id="filtering" class="section level1">
+<h1><span class="header-section-number">8</span> Filtering</h1>
+<p>Here we will give a demonstration of how you can remove some of the cells from the dataset.</p>
+<p>In the <code>DropletUtils</code> package, it was recommended that we should only retain those cells above the inflection plot in the plot. So we will perform subsetiting on the cells (columns) of this data.</p>
+<pre class="r"><code>table(barcode_data$total &gt;= barcode@metadata$inflection)</code></pre>
+<pre><code>## 
+## FALSE  TRUE 
+##     3   504</code></pre>
+<pre class="r"><code>liver_new = liver[, barcode_data$total &gt;= barcode@metadata$inflection]
+dim(liver_new)</code></pre>
+<pre><code>## [1] 37766   504</code></pre>
+<p>Recall in the mitochondiral plot, we have identified cells with a mitochondrial percentage greater than 10% as cells that we should remove. Thus, we will subset the data on the columns to retain those cells with a mitochondrial percentage less or equal to 10%.</p>
+<p>Finally we should check that the dimension of the dataset is correct after filtering.</p>
+<pre class="r"><code>dim(liver)
+liver_new2 = liver[, barcode_data$total &gt;= barcode@metadata$inflection &amp; mito_plotdf_full$mito_percent &lt;= 10]
+dim(liver_new2)</code></pre>
+</div>
+<div id="session-info" class="section level1">
+<h1><span class="header-section-number">9</span> Session Info</h1>
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>## R version 3.6.0 (2019-04-26)
+## Platform: x86_64-apple-darwin15.6.0 (64-bit)
+## Running under: macOS High Sierra 10.13.6
+## 
+## Matrix products: default
+## BLAS:   /Library/Frameworks/R.framework/Versions/3.6/Resources/lib/libRblas.0.dylib
+## LAPACK: /Library/Frameworks/R.framework/Versions/3.6/Resources/lib/libRlapack.dylib
+## 
+## locale:
+## [1] en_AU.UTF-8/en_AU.UTF-8/en_AU.UTF-8/C/en_AU.UTF-8/en_AU.UTF-8
+## 
+## attached base packages:
+## [1] parallel  stats4    stats     graphics  grDevices utils     datasets 
+## [8] methods   base     
+## 
+## other attached packages:
+##  [1] forcats_0.4.0               stringr_1.4.0              
+##  [3] ggpubr_0.2.2                magrittr_1.5               
+##  [5] scales_1.0.0                ggplot2_3.2.1              
+##  [7] dplyr_0.8.3                 DropletUtils_1.5.6         
+##  [9] SingleCellExperiment_1.7.5  SummarizedExperiment_1.15.7
+## [11] DelayedArray_0.11.4         BiocParallel_1.19.2        
+## [13] matrixStats_0.54.0          Biobase_2.45.0             
+## [15] GenomicRanges_1.37.14       GenomeInfoDb_1.21.1        
+## [17] IRanges_2.19.12             S4Vectors_0.23.19          
+## [19] BiocGenerics_0.31.5        
+## 
+## loaded via a namespace (and not attached):
+##  [1] Rcpp_1.0.2             locfit_1.5-9.1         lattice_0.20-38       
+##  [4] zeallot_0.1.0          assertthat_0.2.1       digest_0.6.20         
+##  [7] utf8_1.1.4             plyr_1.8.4             R6_2.4.0              
+## [10] backports_1.1.4        evaluate_0.14          pillar_1.4.2          
+## [13] zlibbioc_1.31.0        rlang_0.4.0            lazyeval_0.2.2        
+## [16] R.utils_2.9.0          R.oo_1.22.0            Matrix_1.2-17         
+## [19] rmarkdown_1.15         labeling_0.3           RCurl_1.95-4.12       
+## [22] munsell_0.5.0          HDF5Array_1.13.5       compiler_3.6.0        
+## [25] xfun_0.9               pkgconfig_2.0.2        htmltools_0.3.6       
+## [28] tidyselect_0.2.5       gridExtra_2.3          tibble_2.1.3          
+## [31] GenomeInfoDbData_1.2.1 edgeR_3.27.12          fansi_0.4.0           
+## [34] crayon_1.3.4           withr_2.1.2            bitops_1.0-6          
+## [37] R.methodsS3_1.7.1      grid_3.6.0             gtable_0.3.0          
+## [40] dqrng_0.2.1            cli_1.1.0              stringi_1.4.3         
+## [43] reshape2_1.4.3         XVector_0.25.0         ggsignif_0.6.0        
+## [46] limma_3.41.15          ellipsis_0.2.0.1       vctrs_0.2.0           
+## [49] cowplot_1.0.0          Rhdf5lib_1.7.4         tools_3.6.0           
+## [52] glue_1.3.1             purrr_0.3.2            yaml_2.2.0            
+## [55] colorspace_1.4-1       rhdf5_2.29.0           knitr_1.24</code></pre>
+</div>
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("show" === "show");
+});
+</script>
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
