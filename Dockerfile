@@ -30,7 +30,7 @@ ADD install.R /home/
 RUN wget https://storage.googleapis.com/scp_data/data.zip -P /home/
 RUN cd /home/ && unzip ./data.zip
 RUN ls /home/
-RUN ls /home/SingleCellPlus/
+# RUN ls /home/SingleCellPlus/
 
 
 # Running tests

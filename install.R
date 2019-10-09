@@ -15,7 +15,7 @@ if(BiocManager::version() != "3.10"){
 }
 
 builtins <- c(
-	"scMerge", "devtools", 
+	"devtools", 
 	"DropletUtils", "edgeR",
 	"ggpubr", "MAST", 
 	"plyr", "Rtsne", 
@@ -23,7 +23,8 @@ builtins <- c(
 	"scran", "tidyverse", 
 	"viridis", "monocle",
 	"DescTools",
-	"SydneyBioX/scdney")
+	"SydneyBioX/scdney",
+	"SydneyBioX/scMerge")
 
 for (builtin in builtins)
     if (!suppressWarnings(require(builtin, character.only=TRUE)))
