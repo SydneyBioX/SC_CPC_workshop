@@ -1,7 +1,7 @@
 # This file controls the layout of the website. 
 name: "SingleCellPlus"
 navbar:
-  title: "SingleCellPlus - HKU Workshop"
+  title: "SingleCellPlus - CPC"
   left:
     - text: "Home"
       href: index.html

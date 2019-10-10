@@ -1,7 +1,7 @@
 ---
 title: "Downstream analysis"
 author: "Sydney Precision Bioinformatics Group"
-date: "18 June 2019"
+date: "04 November 2019"
 output:
   html_document:
     code_folding: show
@@ -58,8 +58,8 @@ In the scMerge publication, we have merged [four mouse liver datasets](https://s
 
 
 ```{r}
-# datapath = "./data/"
-datapath = "/home/data/"
+datapath = "./data/"
+# datapath = "/home/data/"
 sce_scMerge = readRDS(paste0(datapath, "liver_scMerge.rds"))
 
 ## We will subset Su et al. and Yang et al. datasets.

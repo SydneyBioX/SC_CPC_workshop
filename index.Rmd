@@ -1,17 +1,13 @@
 ---
-title: "HKU workshop"
+title: "CPC workshop"
 author: "Sydney Precision Bioinformatics Group"
-date: "18 June 2019"
+date: "04 November 2019"
 output: html_document
 ---
 
-# The Single Cell Plus Workshop
+# Single Cell Plus
 
 This workshop is part of a joint research initiative between Hong Kong University and the University of Sydney.
-
-# Update on August 2019
-
-We will move this workshop to Google Cloud in the future. Some materials needs to be re-written.
 
 # Aim of this workshop
 
@@ -24,66 +20,33 @@ In this workshop we will focus on two mouse liver datasets to illustrate three c
 
 At the end of this workshop you should have some basic understanding of scRNASeq data and some key computational and statistical challenges of this type of data. 
 
-
 # Prerequisites
 
 Ideally, you should be somewhat familiar with `R`. However, if you haven't used `R` before, don't worry! This is not a programming workshop, you can still pick up important practical skills by running the codes we provided. 
 
+## Running workshop on the cloud
+
+Your instructor will provide you with the link to a Google Cloud server, username and the password. Once you log in, you will have access to RStudio via a webpage. 
+
+Type the following code into your console and you are good to go!
+
+```
+source("/home/user_setup.R")
+```
+
+
+
+## Running workshop locally
+
+
+
 Please try to download and install:
 
-  + `R 3.6` from https://cloud.r-project.org/ 
-  + `RStudio` from https://www.rstudio.com/products/rstudio/download/
-
-
-
-# Installation 
-
-You can find all the data and materials [here](http://shiny.maths.usyd.edu.au/singlecellplus/SingleCellPlus_zip.zip). 
-
-You should be able to run the codes below in `R` to install all the packages needed in this workshop. If you encounter any problems. Please let one of the instructors know. 
-
-```{r install, eval = FALSE}
-install.packages("BiocManager")
-BiocManager::install(c("scMerge", "devtools", 
-                       "DropletUtils", "edgeR",
-                       "ggpubr", "MAST", 
-                       "plyr", "Rtsne", 
-                       "scales", "scater", 
-                       "scran", "tidyverse", 
-                       "viridis"), version = "3.10")
-
-
-devtools::install_github("SydneyBioX/scdney")
-```
-
-## For Windows users
-
-If you could not run the last line of the above instructions, then please 
-
-1. Try to install `Rtools35` from https://cran.r-project.org/bin/windows/Rtools/. 
-1. Run `devtools::install_github("SydneyBioX/scdney")` again. 
-
-## For Mac users
-
-If you could not run the last line of the above instructions, then please 
-
-1. Try to install `gfortran-6.1` from https://cran.r-project.org/bin/macosx/tools/.
-1. Try the following code instead.
-
-```{r mac install, eval = FALSE}
-BiocManager::install(c("DescTools", "amap", 
-                       "doParallel", "ggridges", 
-                       "lme4", "mice", 
-                       "methods", "caret", 
-                       "randomForest", "clusteval", 
-                       "dendextend", "gmodels", 
-                       "e1071"), version = "3.10")
-
-install.packages("https://github.com/SydneyBioX/scdney/releases/download/V0.1.4/scdney_0.1.4.tgz", repos = NULL)
-```
-
-
-
+  + Latest `R` from https://cloud.r-project.org/ 
+  + Latest `RStudio` from https://www.rstudio.com/products/rstudio/download/
+  + Download the data from https://storage.googleapis.com/scp_data/data.zip
+  + Install all the necessary packages by running [this script](https://raw.githubusercontent.com/SydneyBioX/SC_CPC_workshop/master/install.R)
+  
 # Clipboard
 
 In some circumstances, we might need to share codes that are not currently a part of the existing materials. Please click [here](https://docs.google.com/document/d/136YffzxjkUM8RIGsnjD_yOkCTWw4Ijdwjy4_58nC-zc/edit?usp=sharing) to access these codes. 
