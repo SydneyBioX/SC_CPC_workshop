@@ -8,10 +8,14 @@ FROM bioconductor/release_core2
 
 MAINTAINER kevin.wang@sydney.edu.au
 
-ADD install.R /home/ ## R package installation scripts
-ADD docker_setup.sh /home/ ## Setup folder structure
-ADD docker_test.R /home/ ## Set up tests for Docker compile, large memory, use config.yaml when building Docker
-ADD omg.R /home/ ## Emergency script
+## R package installation scripts
+ADD install.R /home/ 
+## Setup folder structure
+ADD docker_setup.sh /home/
+## Set up tests for Docker compile, large memory, use config.yaml when building Docker
+ADD docker_test.R /home/   
+## Emergency script
+ADD omg.R /home/ 
 
 ## Install all R packages
 RUN R -f /home/install.R
