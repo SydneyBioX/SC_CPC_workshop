@@ -11,8 +11,8 @@ ls /home/
 ls /home/CPC/
 
 ## wget all data files from Google Cloud Storage into /home/CPC/
-wget https://storage.googleapis.com/scp_data/data.zip -P /home/
-cd /home/ && unzip ./data.zip
-rm -rf /home/__MACOSX
+wget https://storage.googleapis.com/scp_data/data.zip -P /home/CPC/
+cd /home/CPC/ && unzip ./data.zip
+rm -rf /home/CPC/__MACOSX
 ls /home/
 ls /home/CPC/
