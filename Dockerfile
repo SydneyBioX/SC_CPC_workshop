@@ -10,10 +10,17 @@ MAINTAINER kevin.wang@sydney.edu.au
 
 ## R package installation scripts
 ADD install.R /home/ 
+
 ## Setup folder structure
 ADD docker_setup.sh /home/
+
 ## Set up tests for Docker compile, large memory, use config.yaml when building Docker
 ADD docker_test.R /home/   
+
+## Users should source this script to set up their folder
+ADD user_setup.R /home/   
+
+
 ## Emergency script
 ADD omg.R /home/ 
 
