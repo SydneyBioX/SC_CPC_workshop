@@ -30,3 +30,5 @@ RUN R -f /home/install.R
 ## Set up data and teaching materials
 RUN sh /home/docker_setup.sh 
 
+## Running test
+RUN R -f /home/docker_test.R
