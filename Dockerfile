@@ -4,7 +4,7 @@
 
 # The suggested name for this image is: bioconductor/release_base.
 
-FROM bioconductor/release_core2
+FROM bioconductor/devel_core2
 
 MAINTAINER kevin.wang@sydney.edu.au
 
@@ -31,4 +31,4 @@ RUN R -f /home/install.R
 RUN sh /home/docker_setup.sh 
 
 ## Running test
-RUN R -f /home/docker_test.R
+# RUN R -f /home/docker_test.R
