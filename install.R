@@ -16,7 +16,7 @@ if(BiocManager::version() != "3.10"){
 
 builtins <- c(
 	"devtools", 
-	"DropletUtils", "edgeR",
+	"grimbough/DropletUtils", "edgeR",
 	"ggpubr", "MAST", 
 	"plyr", "Rtsne", 
 	"scales", "scater", 

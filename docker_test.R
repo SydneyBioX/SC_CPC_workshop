@@ -6,9 +6,10 @@ setwd(root_folder)
 
 message("Begin internal test")
 start = Sys.time()
-(all_rmd = paste0(root_folder, c("scMerge.Rmd", "downstream.Rmd")))
+(all_rmd = paste0(root_folder, c("qc.Rmd", "scMerge.Rmd", "downstream.Rmd")))
 rmarkdown::render(all_rmd[1])
 rmarkdown::render(all_rmd[2])
+rmarkdown::render(all_rmd[3])
 # rmarkdown::render_site(encoding = 'UTF-8')
 end = Sys.time()
 
