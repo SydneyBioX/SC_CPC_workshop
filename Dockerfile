@@ -20,15 +20,14 @@ ADD docker_test.R /home/
 ## Users should source this script to set up their folder
 ADD user_setup.R /home/   
 
-
 ## Emergency script
 ADD omg.R /home/ 
 
-## Install all R packages
-RUN R -f /home/install.R
-
 ## Set up data and teaching materials
 RUN sh /home/docker_setup.sh 
+
+## Install all R packages
+RUN R -f /home/install.R
 
 ## Running test
 # RUN R -f /home/docker_test.R

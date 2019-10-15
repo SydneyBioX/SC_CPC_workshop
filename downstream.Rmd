@@ -485,7 +485,7 @@ The `monocle` method is a well-established psuedo-time trajectory reconstruction
 
 The code below construct psuedo-time trajectory for the Hepatoblast/Hepatocyte cells in the merged data.
 
-```{r, message = FALSE, warning = FALSE}
+```{r, message = FALSE, warning = FALSE, eval = FALSE}
 ## Subsetting data to "hepatoblast/hepatocyte"
 monocle_data = subset_data[,colData(subset_data)$cellTypes %in% c("hepatoblast/hepatocyte")]
 ## Add a "stage" column to the colData of the monocle_data
@@ -510,6 +510,15 @@ monocle_CellDataSet = scran::convertTo(
 diff_test_res = differentialGeneTest(
   monocle_CellDataSet, fullModelFormulaStr = "~stage")
 
+save(diff_test_res,
+     monocle_CellDataSet,
+     file = paste0(datapath, "monocle_diff_test.RData"))
+```
+
+
+
+```{r}
+load(paste0(datapath, "monocle_diff_test.RData"))
 ## We will select the top genes to be used for clustering and
 ## calculate dispersion (variability) parameters before constructing the trajectory
 ordering_genes = row.names(subset(diff_test_res, qval < 0.00001))
