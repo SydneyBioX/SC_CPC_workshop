@@ -67,6 +67,9 @@ ids = colData(sce_scMerge)$batch %in% c("GSE87795", "GSE90047")
 
 subset_data = sce_scMerge[,ids]
 
+## We do not need the full data any more
+rm(sce_scMerge)
+
 lab = colData(subset_data)$cellTypes
 
 nCs = length(table(lab))
