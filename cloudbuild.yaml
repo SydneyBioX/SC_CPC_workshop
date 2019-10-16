@@ -4,5 +4,5 @@ steps:
 - name: 'gcr.io/cloud-builders/docker'
   args: ['push', 'gcr.io/scpworkshop/cpc:custom']
 options:
- machineType: 'N1_HIGHMEM_2'
+ machineType: 'N1_HIGHCPU_8'
 timeout: 7200s
