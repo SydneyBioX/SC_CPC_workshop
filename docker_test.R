@@ -13,7 +13,7 @@ start = Sys.time()
 # gc()
 # rmarkdown::render(all_rmd[3])
 # gc()
-pryr::mem_change(rmarkdown::render_site(encoding = 'UTF-8'))
+rmarkdown::render_site(encoding = 'UTF-8')
 end = Sys.time()
 
 message("The test completed in ", round(end - start, 2), " mins! You are good to go!")
