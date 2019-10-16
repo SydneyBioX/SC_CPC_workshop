@@ -3,6 +3,6 @@ steps:
   args: ['build', '-m', '30g', '-t', 'gcr.io/scpworkshop/cpc:custom', '.']
 - name: 'gcr.io/cloud-builders/docker'
   args: ['push', 'gcr.io/scpworkshop/cpc:custom']
-options:
- machineType: 'N1_HIGHCPU_8'
+#options:
+# machineType: 'N1_HIGHCPU_8'
 timeout: 7200s
