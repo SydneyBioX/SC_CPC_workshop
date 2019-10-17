@@ -14,17 +14,20 @@ if(BiocManager::version() != "3.10"){
                          update=TRUE, ask=FALSE)
 }
 
-builtins <- c(
-	"devtools", 
-	"grimbough/DropletUtils", "edgeR",
+std_pkgs <- c(
+	"devtools", "edgeR",
 	"ggpubr", "MAST", 
 	"plyr", "Rtsne", 
 	"scales", "scater", 
 	"scran", "tidyverse", 
 	"viridis", "monocle",
-	"DescTools",
-	"SydneyBioX/scdney",
-	"SydneyBioX/scMerge")
+	"DescTools")
+
+gh_pkgs <- c("MarioniLab/DropletUtils",
+             "SydneyBioX/scdney",
+             "SydneyBioX/scMerge")
+
+builtins <- c(std_pkgs, gh_pkgs)
 
 for (builtin in builtins)
     if (!suppressWarnings(require(builtin, character.only=TRUE)))

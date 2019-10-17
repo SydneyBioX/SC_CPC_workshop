@@ -1,9 +1,3 @@
-# DO NOT EDIT FILES CALLED 'Dockerfile'; they are automatically
-# generated. Edit 'Dockerfile.in' and generate the 'Dockerfile'
-# with the 'rake' command.
-
-# The suggested name for this image is: bioconductor/release_base.
-
 FROM bioconductor/devel_core2
 
 MAINTAINER kevin.wang@sydney.edu.au
