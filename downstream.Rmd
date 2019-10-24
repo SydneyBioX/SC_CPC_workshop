@@ -520,7 +520,7 @@ save(diff_test_res,
 
 
 
-```{r}
+```{r, warning=FALSE}
 load(paste0(datapath, "monocle_diff_test.RData"))
 ## We will select the top genes to be used for clustering and
 ## calculate dispersion (variability) parameters before constructing the trajectory
