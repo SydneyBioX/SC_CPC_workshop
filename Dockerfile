@@ -17,10 +17,6 @@ ADD user_setup.R /home/
 ## Emergency script
 ADD omg.R /home/ 
 
-## Script for creating user accounts and setting passwords
-ADD ./deployment/adduser.R /home/ 
-ADD ./deployment/secret.csv /home/
-
 ## Set up data and teaching materials
 RUN sh /home/docker_setup.sh 
 
@@ -29,7 +25,3 @@ RUN R -f /home/install.R
 
 ## Running test
 RUN R -f /home/docker_test.R
-
-## Adding users
-RUN R -f /home/adduser.R
-RUN rm /home/secret.csv
