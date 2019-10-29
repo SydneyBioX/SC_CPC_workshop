@@ -7,7 +7,7 @@ output: html_document
 
 # Single Cell Plus
 
-This workshop is part of a joint research initiative between Hong Kong University and the University of Sydney.
+This workshop is funded by "Single Cell Plus", a research initiative between Hong Kong University and the University of Sydney.
 
 # Aim of this workshop
 
@@ -15,18 +15,18 @@ In this workshop we will focus on two mouse liver datasets to illustrate three c
 
   1. Quality control of sc-RNASeq data,
   1. The `scMerge` package for integrating multiple sc-RNASeq data, 
-  1. Some possible downstream analysis after `scMerge`. 
+  1. Some downstream analyses after `scMerge`. 
 
 
-At the end of this workshop you should have some basic understanding of scRNASeq data and some key computational and statistical challenges of this type of data. 
+At the end of this workshop you should have some basic understanding of sc-RNASeq data and some key computational and statistical challenges of this type of data. 
 
 # Prerequisites
 
-Ideally, you should be somewhat familiar with `R`. However, if you haven't used `R` before, don't worry! This is not a programming workshop, you can still pick up important practical skills by running the codes we provided. 
+Ideally, you should be familiar with `R` and the Bioconductor. However, since this is not a programming workshop, you can still pick up important practical skills by running the codes we provided. 
 
 ## Running workshop on the cloud
 
-Your instructor will provide you with the link to a Google Cloud server, username and the password. Once you log in, you will have access to RStudio via a webpage. 
+Your instructor will provide you with the links to a Google Cloud server, username and the password. Once you log in, you will have access to RStudio via a webpage. 
 
 Type the following code into your console and you are good to go!
 
@@ -34,11 +34,7 @@ Type the following code into your console and you are good to go!
 source("/home/user_setup.R")
 ```
 
-
-
 ## Running workshop locally
-
-
 
 Please try to download and install:
 
@@ -46,10 +42,10 @@ Please try to download and install:
   + Latest `RStudio` from https://www.rstudio.com/products/rstudio/download/
   + Download the data from https://storage.googleapis.com/scp_data/data.zip
   + Install all the necessary packages by running [this script](https://raw.githubusercontent.com/SydneyBioX/SC_CPC_workshop/master/install.R)
-  
+
 # Clipboard
 
-In some circumstances, we might need to share codes that are not currently a part of the existing materials. Please click [here](https://docs.google.com/document/d/136YffzxjkUM8RIGsnjD_yOkCTWw4Ijdwjy4_58nC-zc/edit?usp=sharing) to access these codes. 
+In some circumstances, we might need to share codes beyond the existing materials. Please click [here](https://docs.google.com/document/d/136YffzxjkUM8RIGsnjD_yOkCTWw4Ijdwjy4_58nC-zc/edit?usp=sharing) to access these codes. 
 
 
 # References
@@ -68,8 +64,3 @@ In some circumstances, we might need to share codes that are not currently a par
 1. [Single-cell RNA-Seq analysis reveals dynamic trajectories during mouse liver development](https://doi.org/10.1186/s12864-017-4342-x), BMC Genomics, 2017. Xianbin Su, Yi Shi, Xin Zou, Zhao-Ning Lu, Gangcai Xie, Jean Y. H. Yang, Chong-Chao Wu, Xiao-Fang Cui, Kun-Yan He, Qing Luo, Yu-Lan Qu, Na Wang, Lan Wang, Ze-Guang Han.
 
 1. [A single‐cell transcriptomic analysis reveals precise pathways and regulatory mechanisms underlying hepatoblast differentiation](https://doi.org/10.1002/hep.29353), Hepatology, 2017. Li Yang, Wei‐Hua Wang, Wei‐Lin Qi, Zhen Guo, Erfei Bi, Cheng‐Ran Xu. 
-
-```{r}
-sessionInfo()
-```
-
