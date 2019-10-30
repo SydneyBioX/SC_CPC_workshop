@@ -4,6 +4,7 @@ author: "Sydney Precision Bioinformatics Group"
 date: "04 November 2019"
 output:
   html_document:
+    css: style.css
     code_folding: show
     fig_height: 10
     fig_width: 10

@@ -2,12 +2,18 @@
 title: "CPC workshop"
 author: "Sydney Precision Bioinformatics Group"
 date: "04 November 2019"
-output: html_document
+output:
+  html_document:
+    css: style.css
 ---
 
 # Single Cell Plus
 
 This workshop is funded by "Single Cell Plus", a research initiative between Hong Kong University and the University of Sydney.
+
+# Slides
+
+You can find the workshop slides [here](https://docs.google.com/presentation/d/1LSbZLW16zXhpfmk6p5nhU0uEbFcP_AxDpgit10ETFRw/edit?usp=sharing). 
 
 # Aim of this workshop
 
