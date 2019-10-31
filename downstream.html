@@ -361,9 +361,6 @@ div.tocify {
   <a href="downstream.html">Downstream Analysis</a>
 </li>
 <li>
-  <a href="scClassify.html">scClassify</a>
-</li>
-<li>
   <a href="acknowledgement.html">Acknowledgement</a>
 </li>
       </ul>
@@ -397,10 +394,10 @@ div.tocify {
 <h1><span class="header-section-number">1</span> Introduction</h1>
 <p>We have now preprocessed and merged our single cell data. The next step is to analyse the data for cell type identification, identification of marker genes and <em>et cetera</em>. We will focus on some simple steps of downstream analysis for single cell RNA-sequencing (scRNA-seq) data as shown below.</p>
 <ol style="list-style-type: decimal">
-<li><a href="#q1">What are the cell types present in the dataset?</a></li>
-<li><a href="#q2">What are these cell clusters?</a></li>
-<li><a href="#q3">For a gene of interest, how can I visualise the gene expression distribution?</a></li>
-<li><a href="#q4">What are the cell type composition in the data?</a></li>
+<li>What are the cell types present in the dataset?</li>
+<li>What are these cell clusters?</li>
+<li>For a gene of interest, how can I visualise the gene expression distribution?</li>
+<li>What are the cell type composition in the data?</li>
 </ol>
 <p>We will be using some of the functions we developed in our <code>scdney</code> package. You may visit our package website for the vignette and further details about <a href="https://sydneybiox.github.io/scdney/"><code>scdney</code></a>.</p>
 <div id="loading-packages" class="section level2">
@@ -421,6 +418,7 @@ div.tocify {
   library(ggpubr)
   library(plyr)
   library(monocle)
+  library(scClassify)
 })
 
 theme_set(theme_classic(16))
@@ -450,7 +448,7 @@ mat = SummarizedExperiment::assay(subset_data, &quot;scMerge&quot;)</code></pre>
 </div>
 </div>
 <div id="q1" class="section level1">
-<h1><span class="header-section-number">2</span> Q1. What are the cell types present in the dataset?</h1>
+<h1><span class="header-section-number">2</span> What are the cell types present in the dataset?</h1>
 <p>Typically, a single cell RNA-sequencing experiment does not come with labelled cell type information for individual cells. We will need to identify cell types of indivdual cells in our data with bioinformatics analysis.</p>
 <p>Before we identify the cell types in the dataset, we need to first identify how many distinct group of population we can find from our data. One common method to achieve this is a statistical technique called <strong>clustering</strong>. A clustering method will group similar samples (cells) together and partition samples that are different by comparing their feature information (gene expression).</p>
 <p>There are two components that ultimately determine the performance of a clustering method:</p>
@@ -610,11 +608,12 @@ ggplot(plot_data, aes(x = dist, y = value, fill = dist)) +
 </div>
 </div>
 <div id="q2" class="section level1">
-<h1><span class="header-section-number">3</span> Q2. What are these cell clusters?</h1>
+<h1><span class="header-section-number">3</span> What are these cell clusters?</h1>
 <p>Now that we have clustered all the cells to 6 distinct groups, we may want to find out what these clusters are, i.e. what cell types are there in my dataset? Thus, we may ask what defines a cell type?</p>
 <p>We can use <strong>marker genes</strong> to identify cell types.</p>
-<div id="what-are-the-marker-genes-that-distinguish-the-different-cell-types" class="section level2">
-<h2><span class="header-section-number">3.1</span> 2.1 What are the marker genes that distinguish the different cell types?</h2>
+</div>
+<div id="what-are-the-marker-genes-that-distinguish-the-different-cell-types" class="section level1">
+<h1><span class="header-section-number">4</span> What are the marker genes that distinguish the different cell types?</h1>
 <p>Here we provide a function that allow one to find differentially expressed gene between a cluster and the remaining clusters. The input of this function is the expression matrix and the cluster ID. The output is a list of marker genes and their associated p-values.</p>
 <p>Here we provide an example of using the <code>findmarker</code> function.</p>
 <p>To find out the marker genes in cluster 4, we type in <code>4</code> in the <code>findmarker</code> function. We then look at the top 10 genes ranked by p-value. We can then use <code>ggplot</code> to visualise the distribution of one of the genes across the dataset.</p>
@@ -645,7 +644,7 @@ ggplot(data = tsne_plotdf, aes(x = tsne1, y = tsne2, colour = Gys2) ) +
   geom_point(alpha = 0.5) +
   scale_color_viridis() +
   labs(col = &quot;Gys2 expression&quot;, x = &quot;tsne1&quot;, y = &quot;tsne2&quot;)</code></pre>
-<p><img src="downstream_files/figure-html/unnamed-chunk-14-1.png" width="1152" /></p>
+<p><img src="downstream_files/figure-html/unnamed-chunk-14-1.png" width="768" /></p>
 <h4>
 <span class="glyphicon glyphicon-education" aria-hidden="true"></span> Quick quiz
 </h4>
@@ -662,11 +661,10 @@ ggplot(data = tsne_plotdf,
   geom_point(alpha = 0.5) +
   scale_color_viridis() +
   labs(col=&quot;Erich5 expression&quot;)</code></pre>
-<p><img src="downstream_files/figure-html/unnamed-chunk-16-1.png" width="1152" /></p>
-</div>
+<p><img src="downstream_files/figure-html/unnamed-chunk-16-1.png" width="768" /></p>
 </div>
 <div id="q3" class="section level1">
-<h1><span class="header-section-number">4</span> Q3. For a gene of interest, how can I visualise the gene expression distribution?</h1>
+<h1><span class="header-section-number">5</span> For a gene of interest, how can I visualise the gene expression distribution?</h1>
 <p>In Q2, we have identified some interesting marker genes from our dataset. If we have a gene that we know, and we want to identify the its expression pattern in our dataset, we can also visualise the distribution. For example, Hnf4a has been stated in literature as a marker gene for hepatoblast cell (citation).</p>
 <p>The figure on the left highlight cluster 4 and the figure on the right highlight the expression of Hnf4a.</p>
 <p>This suggests that cluster 4 could belong to hepatoblast cell.</p>
@@ -724,10 +722,10 @@ ggarrange(fig1,fig2, ncol= 2, nrow = 1)</code></pre>
 <p>As you may have already noticed from above steps, unsupervised clustering methods alone are not perfect in capturing cell type information. Using this step iteratively, we need to refine our cell type information.</p>
 </div>
 <div id="q4" class="section level1">
-<h1><span class="header-section-number">5</span> Q4. What are the cell type composition in the data?</h1>
+<h1><span class="header-section-number">6</span> What are the cell type composition in the data?</h1>
 <p><strong>NOTE:</strong> From this step, we will assume we have correctly refined our cell type information from above steps and we will use the cell type information provided in Su et. al. 2017 and Yang et. al. 2017.</p>
 <div id="cell-type-proportions" class="section level2">
-<h2><span class="header-section-number">5.1</span> Cell type proportions</h2>
+<h2><span class="header-section-number">6.1</span> Cell type proportions</h2>
 <pre class="r"><code>plot_data = data.frame(table(lab)) %&gt;%
   dplyr::mutate(lab = reorder(lab, Freq))
 
@@ -739,18 +737,15 @@ ggplot(plot_data,
   labs(x = &quot;Cell types&quot;,
        y = &quot;Frequency&quot;,
        title = &quot;Composition of cell types&quot;) +
+  coord_flip() +
   theme(legend.position = &quot;none&quot;)</code></pre>
-<p><img src="downstream_files/figure-html/unnamed-chunk-19-1.png" width="960" /></p>
+<p><img src="downstream_files/figure-html/unnamed-chunk-19-1.png" width="576" /></p>
 <p>We observe that hepatoblast/hepatocyte is the largest population.</p>
 </div>
 </div>
-<div id="extension-any-rare-cell-type-what-is-the-most-common-cell-type" class="section level1">
-<h1><span class="header-section-number">6</span> Extension: Any rare cell type? What is the most common cell type?</h1>
-</div>
 <div id="extension-monocle" class="section level1">
 <h1><span class="header-section-number">7</span> Extension: Monocle</h1>
-<p>A popular question in scRNA-Seq analysis is if the gene expressions patterns changes over some time.</p>
-<p>The <code>monocle</code> method is a well-established psuedo-time trajectory reconstruction method from <a href="https://www.nature.com/articles/nbt.2859">Trapnell et. al. (2014)</a>. You can learn more about the theoretical construction of <code>monocle</code> here. In terms of computations, <code>monocle</code> requires some psuedo-time modelling on each gene and then markers are selected to perform psuedo-time ordering.</p>
+<p>A popular question in scRNA-Seq analysis is if the gene expressions patterns changes over some time. The <code>monocle</code> method is a well-established psuedo-time trajectory reconstruction method from <a href="https://www.nature.com/articles/nbt.2859">Trapnell et. al. (2014)</a>.</p>
 <p>The code below construct psuedo-time trajectory for the Hepatoblast/Hepatocyte cells in the merged data.</p>
 <pre class="r"><code>## Subsetting data to &quot;hepatoblast/hepatocyte&quot;
 monocle_data = subset_data[,colData(subset_data)$cellTypes %in% c(&quot;hepatoblast/hepatocyte&quot;)]
@@ -786,9 +781,8 @@ ordering_genes = row.names(subset(diff_test_res, qval &lt; 0.00001))
 length(ordering_genes)</code></pre>
 <pre><code>## [1] 868</code></pre>
 <pre class="r"><code>monocle_CellDataSet = setOrderingFilter(monocle_CellDataSet, ordering_genes)
-monocle_CellDataSet = estimateDispersions(monocle_CellDataSet) %&gt;% suppressWarnings()</code></pre>
-<pre><code>## Removing 13 outliers</code></pre>
-<pre class="r"><code># plot_ordering_genes(monocle_CellDataSet)
+monocle_CellDataSet = estimateDispersions(monocle_CellDataSet) %&gt;% suppressWarnings()
+# plot_ordering_genes(monocle_CellDataSet)
 
 ## Construcing the trajectory
 monocle_CellDataSet = reduceDimension(monocle_CellDataSet,
@@ -796,13 +790,202 @@ monocle_CellDataSet = reduceDimension(monocle_CellDataSet,
                                       method = &#39;DDRTree&#39;)
 monocle_CellDataSet = orderCells(monocle_CellDataSet)
 plot_cell_trajectory(monocle_CellDataSet, color_by = &quot;stage&quot;)</code></pre>
-<p><img src="downstream_files/figure-html/unnamed-chunk-21-1.png" width="1152" /></p>
+<p><img src="downstream_files/figure-html/unnamed-chunk-21-1.png" width="768" /></p>
 <pre class="r"><code># monocle::plot_cell_clusters(monocle_CellDataSet)
 plot_genes_in_pseudotime(monocle_CellDataSet[c(&quot;Sarm1&quot;, &quot;Gm38388&quot;),], color_by = &quot;stage&quot;)</code></pre>
-<p><img src="downstream_files/figure-html/unnamed-chunk-21-2.png" width="1152" /></p>
+<p><img src="downstream_files/figure-html/unnamed-chunk-21-2.png" width="768" /></p>
+</div>
+<div id="extension-can-we-use-the-data-as-reference-for-future-cell-type-classification" class="section level1">
+<h1><span class="header-section-number">8</span> Extension: Can we use the data as reference for future cell type classification?</h1>
+<p>A common application of single-cell RNA sequencing (RNA-seq) data is to identify discrete cell types. To take advantage of the large collection of well-annotated scRNA-seq datasets, scClassify package implements a set of methods to perform accurate cell type classification based on ensemble learning and sample size calculation.</p>
+<p>The code below shows an example how to utilise a subset of data as reference data and then classify on the remain data.</p>
+<pre class="r"><code>exprsMat_liver &lt;- assay(subset_data, &quot;scMerge&quot;)
+
+set.seed(2019)
+
+# subsample 80% of the data as training dataset, and rest as test
+idx &lt;- sample(ncol(exprsMat_liver), round(ncol(exprsMat_liver) * 0.8))
+
+liver_exprsMat_train &lt;- exprsMat_liver[, idx]
+liver_exprsMat_test &lt;- exprsMat_liver[, -idx]
+
+liver_cellTypes_train &lt;- subset_data$cellTypes[idx]
+liver_cellTypes_test &lt;- subset_data$cellTypes[-idx]
+
+
+table(liver_cellTypes_train)</code></pre>
+<pre><code>## liver_cellTypes_train
+##          cholangiocyte       Endothelial Cell          Hematopoietic 
+##                     83                     44                    117 
+## hepatoblast/hepatocyte            Immune cell       Mesenchymal Cell 
+##                    321                     44                     61</code></pre>
+<p>We first perform non-ensemble scClassify by using 80% data as our reference dataset. We use <code>WKNN</code> as the KNN algorithm, <code>DE</code> (differential expression genes) as the gene selection method, and lastly pearson as the similarity calculation method.</p>
+<pre class="r"><code>trainLiver &lt;- scClassify::train_scClassify(exprsMat_train = liver_exprsMat_train, 
+                                           cellTypes_train = liver_cellTypes_train,
+                                           algorithm = &quot;WKNN&quot;,
+                                           selectFeatures = c(&quot;limma&quot;),
+                                           similarity = c(&quot;pearson&quot;),
+                                           returnList = FALSE,
+                                           verbose = TRUE)</code></pre>
+<pre><code>## after filtering not expressed genes 
+## [1] 22864   670
+## [1] &quot;Feature Selection...&quot;
+## [1] &quot;Number of genes selected to construct HOPACH tree 300&quot;
+## [1] &quot;Constructing tree ...&quot;
+## [1] &quot;Training....&quot;
+## [1] &quot;============ selecting features by: limma ============&quot;</code></pre>
+<pre class="r"><code>trainLiver</code></pre>
+<pre><code>## Class: scClassifyTrainModel 
+## Model name: training 
+## Feature selection methods: limma 
+## Number of cells in the training data: 670 
+## Number of cell types in the training data: 6</code></pre>
+<p>We can visualise the cell type hirearchy tree using <code>plotCellTypeTree()</code>:</p>
+<pre class="r"><code>scClassify::plotCellTypeTree(trainLiver@cellTypeTree)</code></pre>
+<p><img src="downstream_files/figure-html/unnamed-chunk-24-1.png" width="1152" /></p>
+<p>Next, we perform <code>predict_scClassify()</code> with our trained model <code>trainRes = trainLiver</code> to predict the cell types of our query data matrix <code>liver_exprsMat_test</code>. Here, we used <code>pearson</code> as similarity metrics.</p>
+<pre class="r"><code>pred_res &lt;- scClassify::predict_scClassify(exprsMat_test = liver_exprsMat_test, 
+                               cellTypes_test = liver_cellTypes_test,
+                               trainRes = trainLiver,
+                               algorithm = &quot;WKNN&quot;,
+                               features = c(&quot;limma&quot;),
+                               similarity = c(&quot;pearson&quot;),
+                               prob_threshold = 0.7,
+                               verbose = TRUE)</code></pre>
+<pre><code>## Ensemble learning is disabled... 
+## Using parameters: 
+## similarity  algorithm   features 
+##  &quot;pearson&quot;     &quot;WKNN&quot;    &quot;limma&quot; 
+## [1] &quot;Using dynamic correlation cutoff...&quot;
+## [1] &quot;Using dynamic correlation cutoff...&quot;
+## [1] &quot;Using dynamic correlation cutoff...&quot;
+## classify_res
+##                correct   correctly unassigned           intermediate 
+##             0.91017964             0.00000000             0.02994012 
+## incorrectly unassigned         error assigned          misclassified 
+##             0.01197605             0.00000000             0.04790419</code></pre>
+<pre class="r"><code>scClassify_res &lt;- pred_res$pearson_WKNN_limma$predRes</code></pre>
+<p>Check predicting results with the original labels.</p>
+<pre class="r"><code># create tsne object
+set.seed(123)
+tsne_result_test = Rtsne::Rtsne(t(liver_exprsMat_test), check_duplicates = FALSE)
+
+#################################################
+
+plot_data = data.frame(
+  tsne1 = rep(tsne_result_test$Y[,1], 2),
+  tsne2 = rep(tsne_result_test$Y[,2], 2),
+  cluster = factor(c(liver_cellTypes_test, scClassify_res)),
+  label = rep(c(&quot;Truth&quot;, &quot;scClassify&quot;), each = length(liver_cellTypes_test)))
+
+
+ggplot(plot_data, aes(x = tsne1, y = tsne2, colour = cluster)) +
+  geom_point(size = 2) +
+  labs(title = &quot;t-SNE plot&quot;) +
+  facet_grid(~label) +
+  theme(legend.position = &quot;bottom&quot;)</code></pre>
+<p><img src="downstream_files/figure-html/unnamed-chunk-26-1.png" width="1152" /></p>
+<pre class="r"><code>tab &lt;- table(pred_res$pearson_WKNN_limma$predRes, liver_cellTypes_test)
+knitr::kable(tab)</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th align="right">cholangiocyte</th>
+<th align="right">Endothelial Cell</th>
+<th align="right">Hematopoietic</th>
+<th align="right">hepatoblast/hepatocyte</th>
+<th align="right">Immune cell</th>
+<th align="right">Mesenchymal Cell</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>cholangiocyte</td>
+<td align="right">17</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td>Endothelial Cell</td>
+<td align="right">0</td>
+<td align="right">8</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">2</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td>Hematopoietic</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">27</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td>hepatoblast/hepatocyte</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">73</td>
+<td align="right">0</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td>hepatoblast/hepatocyte_cholangiocyte</td>
+<td align="right">3</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">1</td>
+</tr>
+<tr class="even">
+<td>Immune cell</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">2</td>
+<td align="right">0</td>
+<td align="right">3</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td>Immune cell_Mesenchymal Cell_Hematopoietic</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">2</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td>Mesenchymal Cell</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">24</td>
+</tr>
+<tr class="odd">
+<td>unassigned</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">2</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+</tr>
+</tbody>
+</table>
 </div>
 <div id="sessioninfo" class="section level1">
-<h1><span class="header-section-number">8</span> SessionInfo</h1>
+<h1><span class="header-section-number">9</span> SessionInfo</h1>
 <pre class="r"><code>sessionInfo()</code></pre>
 <pre><code>## R version 3.6.1 (2019-07-05)
 ## Platform: x86_64-apple-darwin15.6.0 (64-bit)
@@ -820,65 +1003,68 @@ plot_genes_in_pseudotime(monocle_CellDataSet[c(&quot;Sarm1&quot;, &quot;Gm38388&
 ##  [8] datasets  methods   base     
 ## 
 ## other attached packages:
-##  [1] monocle_2.14.0              DDRTree_0.1.5              
-##  [3] irlba_2.3.3                 VGAM_1.1-1                 
-##  [5] Matrix_1.2-17               plyr_1.8.4                 
-##  [7] ggpubr_0.2.3                magrittr_1.5               
-##  [9] viridis_0.5.1               viridisLite_0.3.0          
-## [11] MAST_1.12.0                 ggplot2_3.2.1              
-## [13] cluster_2.1.0               Rtsne_0.15                 
-## [15] mclust_5.4.5                scdney_0.1.5               
-## [17] edgeR_3.28.0                limma_3.42.0               
-## [19] dplyr_0.8.3                 SingleCellExperiment_1.8.0 
-## [21] SummarizedExperiment_1.16.0 DelayedArray_0.12.0        
-## [23] BiocParallel_1.20.0         matrixStats_0.55.0         
-## [25] Biobase_2.46.0              GenomicRanges_1.38.0       
-## [27] GenomeInfoDb_1.22.0         IRanges_2.20.0             
-## [29] S4Vectors_0.24.0            BiocGenerics_0.32.0        
+##  [1] scClassify_0.2.0            monocle_2.14.0             
+##  [3] DDRTree_0.1.5               irlba_2.3.3                
+##  [5] VGAM_1.1-1                  Matrix_1.2-17              
+##  [7] plyr_1.8.4                  ggpubr_0.2.3               
+##  [9] magrittr_1.5                viridis_0.5.1              
+## [11] viridisLite_0.3.0           MAST_1.12.0                
+## [13] ggplot2_3.2.1               cluster_2.1.0              
+## [15] Rtsne_0.15                  mclust_5.4.5               
+## [17] scdney_0.1.5                edgeR_3.28.0               
+## [19] limma_3.42.0                dplyr_0.8.3                
+## [21] SingleCellExperiment_1.8.0  SummarizedExperiment_1.16.0
+## [23] DelayedArray_0.12.0         BiocParallel_1.20.0        
+## [25] matrixStats_0.55.0          Biobase_2.46.0             
+## [27] GenomicRanges_1.38.0        GenomeInfoDb_1.22.0        
+## [29] IRanges_2.20.0              S4Vectors_0.24.0           
+## [31] BiocGenerics_0.32.0        
 ## 
 ## loaded via a namespace (and not attached):
 ##   [1] snow_0.4-3             backports_1.1.5        Hmisc_4.2-0           
-##   [4] igraph_1.2.4.1         lazyeval_0.2.2         densityClust_0.3      
-##   [7] fastICA_1.2-2          amap_0.8-17            digest_0.6.22         
-##  [10] foreach_1.4.7          htmltools_0.4.0        checkmate_1.9.4       
-##  [13] doParallel_1.0.15      mixtools_1.1.0         recipes_0.1.7         
-##  [16] graphlayouts_0.5.0     gower_0.2.1            docopt_0.6.1          
-##  [19] colorspace_1.4-1       ggrepel_0.8.1          pan_1.6               
-##  [22] xfun_0.10              sparsesvd_0.2          crayon_1.3.4          
-##  [25] RCurl_1.95-4.12        lme4_1.1-21            zeallot_0.1.0         
-##  [28] survival_2.44-1.1      iterators_1.0.12       glue_1.3.1            
-##  [31] polyclip_1.10-0        gtable_0.3.0           ipred_0.9-9           
-##  [34] zlibbioc_1.32.0        XVector_0.26.0         jomo_2.6-9            
-##  [37] abind_1.4-5            scales_1.0.0           pheatmap_1.0.12       
-##  [40] mvtnorm_1.0-11         Rcpp_1.0.2             htmlTable_1.13.2      
-##  [43] proxy_0.4-23           foreign_0.8-72         Formula_1.2-3         
-##  [46] lava_1.6.6             prodlim_2018.04.18     htmlwidgets_1.5.1     
-##  [49] FNN_1.1.3              RColorBrewer_1.1-2     ellipsis_0.3.0        
-##  [52] acepack_1.4.1          mice_3.6.0             pkgconfig_2.0.3       
-##  [55] farver_1.1.0           nnet_7.3-12            locfit_1.5-9.1        
-##  [58] caret_6.0-84           labeling_0.3           tidyselect_0.2.5      
-##  [61] rlang_0.4.1            reshape2_1.4.3         pbmcapply_1.5.0       
-##  [64] munsell_0.5.0          tools_3.6.1            generics_0.0.2        
-##  [67] broom_0.5.2            ggridges_0.5.1         evaluate_0.14         
-##  [70] stringr_1.4.0          yaml_2.2.0             ModelMetrics_1.2.2    
-##  [73] knitr_1.25             tidygraph_1.1.2        RANN_2.6.1            
-##  [76] randomForest_4.6-14    purrr_0.3.3            mitml_0.3-7           
-##  [79] dendextend_1.12.0      ggraph_2.0.0           nlme_3.1-141          
-##  [82] slam_0.1-45            compiler_3.6.1         rstudioapi_0.10       
-##  [85] ggsignif_0.6.0         e1071_1.7-2            tibble_2.1.3          
-##  [88] tweenr_1.0.1           DescTools_0.99.29      stringi_1.4.3         
-##  [91] lattice_0.20-38        hopach_2.46.0          nloptr_1.2.1          
-##  [94] HSMMSingleCell_1.5.0   vctrs_0.2.0            pillar_1.4.2          
-##  [97] lifecycle_0.1.0        combinat_0.0-8         cowplot_1.0.0         
-## [100] data.table_1.12.6      bitops_1.0-6           R6_2.4.0              
-## [103] latticeExtra_0.6-28    gridExtra_2.3          codetools_0.2-16      
-## [106] boot_1.3-23            MASS_7.3-51.4          assertthat_0.2.1      
-## [109] minpack.lm_1.2-1       withr_2.1.2            qlcMatrix_0.9.7       
-## [112] GenomeInfoDbData_1.2.2 expm_0.999-4           doSNOW_1.0.18         
-## [115] grid_3.6.1             rpart_4.1-15           timeDate_3043.102     
-## [118] tidyr_1.0.0            class_7.3-15           minqa_1.2.4           
-## [121] rmarkdown_1.16         segmented_1.0-0        clusteval_0.1         
-## [124] ggforce_0.3.1          lubridate_1.7.4        base64enc_0.1-3</code></pre>
+##   [4] igraph_1.2.4.1         lazyeval_0.2.2         proxyC_0.1.5          
+##   [7] densityClust_0.3       fastICA_1.2-2          amap_0.8-17           
+##  [10] digest_0.6.22          foreach_1.4.7          htmltools_0.4.0       
+##  [13] checkmate_1.9.4        doParallel_1.0.15      mixtools_1.1.0        
+##  [16] recipes_0.1.7          graphlayouts_0.5.0     gower_0.2.1           
+##  [19] RcppParallel_4.4.4     docopt_0.6.1           colorspace_1.4-1      
+##  [22] ggrepel_0.8.1          pan_1.6                xfun_0.10             
+##  [25] sparsesvd_0.2          crayon_1.3.4           RCurl_1.95-4.12       
+##  [28] lme4_1.1-21            zeallot_0.1.0          survival_2.44-1.1     
+##  [31] iterators_1.0.12       glue_1.3.1             polyclip_1.10-0       
+##  [34] gtable_0.3.0           ipred_0.9-9            zlibbioc_1.32.0       
+##  [37] XVector_0.26.0         jomo_2.6-9             abind_1.4-5           
+##  [40] scales_1.0.0           pheatmap_1.0.12        mvtnorm_1.0-11        
+##  [43] Rcpp_1.0.2             htmlTable_1.13.2       proxy_0.4-23          
+##  [46] foreign_0.8-72         Formula_1.2-3          lava_1.6.6            
+##  [49] prodlim_2018.04.18     htmlwidgets_1.5.1      FNN_1.1.3             
+##  [52] RColorBrewer_1.1-2     ellipsis_0.3.0         acepack_1.4.1         
+##  [55] mice_3.6.0             pkgconfig_2.0.3        farver_1.1.0          
+##  [58] nnet_7.3-12            locfit_1.5-9.1         caret_6.0-84          
+##  [61] labeling_0.3           tidyselect_0.2.5       rlang_0.4.1           
+##  [64] reshape2_1.4.3         pbmcapply_1.5.0        munsell_0.5.0         
+##  [67] tools_3.6.1            generics_0.0.2         broom_0.5.2           
+##  [70] ggridges_0.5.1         evaluate_0.14          stringr_1.4.0         
+##  [73] yaml_2.2.0             ModelMetrics_1.2.2     knitr_1.25            
+##  [76] tidygraph_1.1.2        RANN_2.6.1             randomForest_4.6-14   
+##  [79] purrr_0.3.3            mitml_0.3-7            dendextend_1.12.0     
+##  [82] ggraph_2.0.0           nlme_3.1-141           slam_0.1-45           
+##  [85] compiler_3.6.1         rstudioapi_0.10        ggsignif_0.6.0        
+##  [88] e1071_1.7-2            statmod_1.4.32         tibble_2.1.3          
+##  [91] tweenr_1.0.1           DescTools_0.99.29      stringi_1.4.3         
+##  [94] highr_0.8              lattice_0.20-38        hopach_2.46.0         
+##  [97] nloptr_1.2.1           HSMMSingleCell_1.5.0   vctrs_0.2.0           
+## [100] pillar_1.4.2           lifecycle_0.1.0        combinat_0.0-8        
+## [103] cowplot_1.0.0          data.table_1.12.6      bitops_1.0-6          
+## [106] R6_2.4.0               latticeExtra_0.6-28    gridExtra_2.3         
+## [109] codetools_0.2-16       boot_1.3-23            MASS_7.3-51.4         
+## [112] assertthat_0.2.1       minpack.lm_1.2-1       withr_2.1.2           
+## [115] qlcMatrix_0.9.7        GenomeInfoDbData_1.2.2 diptest_0.75-7        
+## [118] mgcv_1.8-29            expm_0.999-4           doSNOW_1.0.18         
+## [121] grid_3.6.1             rpart_4.1-15           timeDate_3043.102     
+## [124] tidyr_1.0.0            class_7.3-15           minqa_1.2.4           
+## [127] rmarkdown_1.16         segmented_1.0-0        clusteval_0.1         
+## [130] ggforce_0.3.1          lubridate_1.7.4        base64enc_0.1-3</code></pre>
 </div>
 
 

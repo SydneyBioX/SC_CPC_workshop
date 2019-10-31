@@ -14,14 +14,19 @@ output:
     toc_float: yes
 ---
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(message = FALSE, 
+                      warning = FALSE)
+```
+
 # Introduction
 
 We have now preprocessed and merged our single cell data. The next step is to analyse the data for cell type identification, identification of marker genes and *et cetera*. We will focus on some simple steps of downstream analysis for single cell RNA-sequencing (scRNA-seq) data as shown below.
 
-1. [What are the cell types present in the dataset?](#q1)
-2. [What are these cell clusters?](#q2)
-3. [For a gene of interest, how can I visualise the gene expression distribution?](#q3)
-4. [What are the cell type composition in the data?](#q4)
+1. What are the cell types present in the dataset?
+2. What are these cell clusters?
+3. For a gene of interest, how can I visualise the gene expression distribution?
+4. What are the cell type composition in the data?
 
 
 We will be using some of the functions we developed in our  `scdney` package. You may visit our package website for the vignette and further details about [`scdney`](https://sydneybiox.github.io/scdney/).
@@ -46,6 +51,7 @@ suppressPackageStartupMessages({
   library(ggpubr)
   library(plyr)
   library(monocle)
+  library(scClassify)
 })
 
 theme_set(theme_classic(16))
@@ -103,7 +109,7 @@ cell_data %>%
 
 
 
-# Q1. What are the cell types present in the dataset? {#q1}
+# What are the cell types present in the dataset? {#q1}
 
 Typically, a single cell RNA-sequencing experiment does not come with labelled cell type information for individual cells. We will need to identify cell types of indivdual cells in our data with bioinformatics analysis.
 
@@ -308,13 +314,13 @@ ggplot(plot_data, aes(x = dist, y = value, fill = dist)) +
 
 
 
-# Q2. What are these cell clusters? {#q2}
+# What are these cell clusters? {#q2}
 
 Now that we have clustered all the cells to 6 distinct groups, we may want to find out what these clusters are, i.e. what cell types are there in my dataset? Thus, we may ask what defines a cell type?
 
 We can use **marker genes** to identify cell types.
 
-## 2.1 What are the marker genes that distinguish the different cell types?
+# What are the marker genes that distinguish the different cell types?
 
 Here we provide a function that allow one to find differentially expressed gene between a cluster and the remaining clusters. The input of this function is the expression matrix and the cluster ID. The output is a list of marker genes and their associated p-values.
 
@@ -342,7 +348,7 @@ marker_cluster4[1:10, ]
 ```
 
 
-```{r, message=FALSE, warning=FALSE}
+```{r, fig.width = 8, fig.height = 4}
 tsne_plotdf = data.frame(
   tsne1 = tsne_result$Y[, 1],
   tsne2 = tsne_result$Y[, 2]) %>%
@@ -371,7 +377,7 @@ ggplot(data = tsne_plotdf, aes(x = tsne1, y = tsne2, colour = Gys2) ) +
 marker_cluster3 = readRDS(paste0(datapath, "marker_cluster3.rds"))
 ```
 
-```{r, message=FALSE, warning=FALSE}
+```{r, fig.width = 8, fig.height = 4}
 tsne_plotdf = tsne_plotdf %>%
   dplyr::mutate(Erich5 = mat["Erich5",])
 
@@ -385,7 +391,7 @@ ggplot(data = tsne_plotdf,
 
 
 
-# Q3. For a gene of interest, how can I visualise the gene expression distribution? {#q3}
+# For a gene of interest, how can I visualise the gene expression distribution? {#q3}
 
 
 In Q2, we have identified some interesting marker genes from our dataset. If we have a gene that we know, and we want to identify the its expression pattern in our dataset, we can also visualise the distribution. For example, Hnf4a has been stated in literature as a marker gene for hepatoblast cell (citation).
@@ -455,13 +461,13 @@ ggarrange(fig1,fig2, ncol= 2, nrow = 1)
 As you may have already noticed from above steps, unsupervised clustering methods alone are not perfect in capturing cell type information. Using this step iteratively, we need to refine our cell type information.
 
 
-# Q4. What are the cell type composition in the data? {#q4}
+# What are the cell type composition in the data? {#q4}
 
 **NOTE:** From this step, we will assume we have correctly refined our cell type information from above steps and we will use the cell type information provided in Su et. al. 2017 and Yang et. al. 2017.
 
 ## Cell type proportions
 
-```{r, fig.width = 10, fig.height=10}
+```{r, fig.width = 6, fig.height = 6}
 plot_data = data.frame(table(lab)) %>%
   dplyr::mutate(lab = reorder(lab, Freq))
 
@@ -473,19 +479,18 @@ ggplot(plot_data,
   labs(x = "Cell types",
        y = "Frequency",
        title = "Composition of cell types") +
+  coord_flip() +
   theme(legend.position = "none")
 ```
 
 We observe that hepatoblast/hepatocyte is the largest population.
 
 
-# Extension: Any rare cell type? What is the most common cell type?
 
 # Extension: Monocle
 
-A popular question in scRNA-Seq analysis is if the gene expressions patterns changes over some time.
+A popular question in scRNA-Seq analysis is if the gene expressions patterns changes over some time. The `monocle` method is a well-established psuedo-time trajectory reconstruction method from [Trapnell et. al. (2014)](https://www.nature.com/articles/nbt.2859).
 
-The `monocle` method is a well-established psuedo-time trajectory reconstruction method from [Trapnell et. al. (2014)](https://www.nature.com/articles/nbt.2859). You can learn more about the theoretical construction of `monocle` here. In terms of computations, `monocle` requires some psuedo-time modelling on each gene and then markers are selected to perform psuedo-time ordering.
 
 The code below construct psuedo-time trajectory for the Hepatoblast/Hepatocyte cells in the merged data.
 
@@ -521,7 +526,7 @@ save(diff_test_res,
 
 
 
-```{r, warning=FALSE}
+```{r, fig.width = 8, fig.height = 8, warning=FALSE}
 load(paste0(datapath, "monocle_diff_test.RData"))
 ## We will select the top genes to be used for clustering and
 ## calculate dispersion (variability) parameters before constructing the trajectory
@@ -540,6 +545,101 @@ plot_cell_trajectory(monocle_CellDataSet, color_by = "stage")
 # monocle::plot_cell_clusters(monocle_CellDataSet)
 plot_genes_in_pseudotime(monocle_CellDataSet[c("Sarm1", "Gm38388"),], color_by = "stage")
 ```
+
+
+# Extension: Can we use the data as reference for future cell type classification?
+
+
+A common application of single-cell RNA sequencing (RNA-seq) data is to identify discrete cell types. To take advantage of the large collection of well-annotated scRNA-seq datasets, scClassify package implements a set of methods to perform accurate cell type classification based on ensemble learning and sample size calculation. 
+
+The code below shows an example how to utilise a subset of data as reference data and then classify on the remain data.
+
+```{r}
+exprsMat_liver <- assay(subset_data, "scMerge")
+
+set.seed(2019)
+
+# subsample 80% of the data as training dataset, and rest as test
+idx <- sample(ncol(exprsMat_liver), round(ncol(exprsMat_liver) * 0.8))
+
+liver_exprsMat_train <- exprsMat_liver[, idx]
+liver_exprsMat_test <- exprsMat_liver[, -idx]
+
+liver_cellTypes_train <- subset_data$cellTypes[idx]
+liver_cellTypes_test <- subset_data$cellTypes[-idx]
+
+
+table(liver_cellTypes_train)
+```
+
+We first perform non-ensemble scClassify by using 80% data as our reference dataset. We use `WKNN` as the KNN algorithm, `DE` (differential expression genes) as the gene selection method, and lastly pearson as the similarity calculation method.
+
+
+```{r}
+trainLiver <- scClassify::train_scClassify(exprsMat_train = liver_exprsMat_train, 
+                                           cellTypes_train = liver_cellTypes_train,
+                                           algorithm = "WKNN",
+                                           selectFeatures = c("limma"),
+                                           similarity = c("pearson"),
+                                           returnList = FALSE,
+                                           verbose = TRUE)
+
+trainLiver
+```
+
+
+We can visualise the cell type hirearchy tree using `plotCellTypeTree()`:
+
+```{r}
+scClassify::plotCellTypeTree(trainLiver@cellTypeTree)
+```
+
+Next, we perform `predict_scClassify()` with our trained model `trainRes = trainLiver` to predict the cell types of our query data matrix `liver_exprsMat_test`. Here, we used `pearson` as similarity metrics.
+
+```{r}
+pred_res <- scClassify::predict_scClassify(exprsMat_test = liver_exprsMat_test, 
+                               cellTypes_test = liver_cellTypes_test,
+                               trainRes = trainLiver,
+                               algorithm = "WKNN",
+                               features = c("limma"),
+                               similarity = c("pearson"),
+                               prob_threshold = 0.7,
+                               verbose = TRUE)
+
+scClassify_res <- pred_res$pearson_WKNN_limma$predRes
+```
+
+
+Check predicting results with the original labels.
+
+
+```{r}
+# create tsne object
+set.seed(123)
+tsne_result_test = Rtsne::Rtsne(t(liver_exprsMat_test), check_duplicates = FALSE)
+
+#################################################
+
+plot_data = data.frame(
+  tsne1 = rep(tsne_result_test$Y[,1], 2),
+  tsne2 = rep(tsne_result_test$Y[,2], 2),
+  cluster = factor(c(liver_cellTypes_test, scClassify_res)),
+  label = rep(c("Truth", "scClassify"), each = length(liver_cellTypes_test)))
+
+
+ggplot(plot_data, aes(x = tsne1, y = tsne2, colour = cluster)) +
+  geom_point(size = 2) +
+  labs(title = "t-SNE plot") +
+  facet_grid(~label) +
+  theme(legend.position = "bottom")
+```
+
+
+```{r}
+tab <- table(pred_res$pearson_WKNN_limma$predRes, liver_cellTypes_test)
+knitr::kable(tab)
+```
+
 
 
 

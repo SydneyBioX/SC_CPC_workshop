@@ -361,9 +361,6 @@ div.tocify {
   <a href="downstream.html">Downstream Analysis</a>
 </li>
 <li>
-  <a href="scClassify.html">scClassify</a>
-</li>
-<li>
   <a href="acknowledgement.html">Acknowledgement</a>
 </li>
       </ul>
@@ -458,8 +455,8 @@ dim(liver)</code></pre>
 </ol>
 </div>
 </div>
-<div id="qc1-waterfall-plot" class="section level1">
-<h1><span class="header-section-number">3</span> QC1: Waterfall plot</h1>
+<div id="waterfall-plot" class="section level1">
+<h1><span class="header-section-number">3</span> Waterfall plot</h1>
 <p>The waterfall plot shows the log-count against the log-rank of each barcode. The barcodes are ranked based on the number of count each barcode has. We will compute these statistics using the <code>barcodeRanks</code> function from the <code>DropletUtils</code> package. And then we will extra the statistics and perform some plotting using the <code>ggplot2</code> package.</p>
 <p>The waterfall plots show two points of interest:</p>
 <ul>
@@ -493,8 +490,8 @@ ggplot(data = barcode_data, aes(x = rank, y = total)) +
 </h4>
 <p>Based on the waterfall plot, should we filter out any cells?</p>
 </div>
-<div id="qc2-library-size" class="section level1">
-<h1><span class="header-section-number">4</span> QC2: Library size</h1>
+<div id="library-size" class="section level1">
+<h1><span class="header-section-number">4</span> Library size</h1>
 <p>Next, we can evaluate the total library size, that is the total read counts per cell. The library size may be used as an indicator of sequencing depth and it is a typical diagnostic for RNA-Seq data (for both the bulk and singl-cell type).</p>
 <p>A small library size for a cell may suggest abnormalies and lack of captured signals. In such a case, the cells with usually small library size should be removed.</p>
 <p>We will begin with a <code>data.frame</code> capturing the characteristics of each column <code>cell_plotdf_full</code> and then perform plotting with <code>ggplot2</code>. This <code>cell_plotdf_full</code> has four columns:</p>
@@ -552,8 +549,8 @@ cell_plotdf_mean</code></pre>
 <p><img src="qc_files/figure-html/unnamed-chunk-6-1.png" width="768" /></p>
 <p>When we compare the distribution of librarzy size for all cells at three developmental stages, we can see that mean library size is lowest in E11.5 cells (mean = 2.838642 million) and highest in E13.5 cells (mean = 3.639297 million). E12.5 cells (mean = 3.094663 million) have a greater distribution of cells with few reads. Cells with very few reads are likely to have failed to capture the transcriptome of a cell, and thus should be filtered.</p>
 </div>
-<div id="qc3-number-of-uniquely-expressed-genes" class="section level1">
-<h1><span class="header-section-number">5</span> QC3: Number of uniquely expressed genes</h1>
+<div id="number-of-uniquely-expressed-genes" class="section level1">
+<h1><span class="header-section-number">5</span> Number of uniquely expressed genes</h1>
 <p>Closely related to the idea of a library size is the number of uniquly expressed genes. In addition to sequencing depth, we can also filter for cells that express genes with sufficiently good coverage of the transcriptome. This is to ensure that we capture cells with not only sufficient reads but also those that have reads that are relatively evenly distributed across the transcriptome. To this end, we measure the number of uniquely expressed genes in individual cells.</p>
 <pre class="r"><code>ggplot(cell_plotdf,
        aes(x = num_genes/1000, colour = stage, fill = stage)) +
@@ -569,8 +566,8 @@ cell_plotdf_mean</code></pre>
 <p><img src="qc_files/figure-html/unnamed-chunk-7-1.png" width="768" /></p>
 <p>From above, we can see that most cells have between 9000-10,000 detected genes. This is roughly the amount expected for high-depth scRNA-seq; however, the expected value may vary between experimental protocols, sequencing depth, and cell type used. Note that, unlike library size, a “heavy tail” can be observed for each of the distribution, indicating an unequal detection of genes across populations. Filtering out cells with low number of genes identified is another way to improve the quality of the dataset.</p>
 </div>
-<div id="qc4-mitochondrial-gene-expression" class="section level1">
-<h1><span class="header-section-number">6</span> QC4: Mitochondrial gene expression</h1>
+<div id="mitochondrial-gene-expression" class="section level1">
+<h1><span class="header-section-number">6</span> Mitochondrial gene expression</h1>
 <p>Unhealthy or dying cells are associated with high expression of mitochondrial genes, and thus the proportion of mitochondrial expression is commonly used as a quality metric.</p>
 <pre class="r"><code>mito_genes &lt;- c(&quot;ENSMUSG00000064336&quot;, &quot;ENSMUSG00000064337&quot;, &quot;ENSMUSG00000064338&quot;, &quot;ENSMUSG00000064339&quot;, &quot;ENSMUSG00000064340&quot;, &quot;ENSMUSG00000064341&quot;, &quot;ENSMUSG00000064342&quot;, &quot;ENSMUSG00000064343&quot;, &quot;ENSMUSG00000064344&quot;, &quot;ENSMUSG00000064345&quot;, &quot;ENSMUSG00000064346&quot;, &quot;ENSMUSG00000064347&quot;, &quot;ENSMUSG00000064348&quot;, &quot;ENSMUSG00000064349&quot;, &quot;ENSMUSG00000064350&quot;, &quot;ENSMUSG00000064351&quot;, &quot;ENSMUSG00000064352&quot;, &quot;ENSMUSG00000064353&quot;, &quot;ENSMUSG00000064354&quot;, &quot;ENSMUSG00000064355&quot;, &quot;ENSMUSG00000064356&quot;, &quot;ENSMUSG00000064357&quot;, &quot;ENSMUSG00000064358&quot;, &quot;ENSMUSG00000064359&quot;, &quot;ENSMUSG00000064360&quot;, &quot;ENSMUSG00000064361&quot;, &quot;ENSMUSG00000065947&quot;, &quot;ENSMUSG00000064363&quot;, &quot;ENSMUSG00000064364&quot;, &quot;ENSMUSG00000064365&quot;, &quot;ENSMUSG00000064366&quot;, &quot;ENSMUSG00000064367&quot;, &quot;ENSMUSG00000064368&quot;, &quot;ENSMUSG00000064369&quot;, &quot;ENSMUSG00000064370&quot;, &quot;ENSMUSG00000064371&quot;, &quot;ENSMUSG00000064372&quot;, &quot;ENSMUSG00000096105&quot;)
 
@@ -626,8 +623,8 @@ ggpubr::ggarrange(g1, g2, ncol=  2, common.legend = TRUE, legend = &quot;right&q
 <li>How does the percentage of mitochondrial gene expression change over time point?</li>
 </ol>
 </div>
-<div id="qc5-contribution-by-the-top-50-expressed-genes" class="section level1">
-<h1><span class="header-section-number">7</span> QC5: Contribution by the top 50 expressed genes</h1>
+<div id="contribution-by-the-top-50-expressed-genes" class="section level1">
+<h1><span class="header-section-number">7</span> Contribution by the top 50 expressed genes</h1>
 <p>As well as the above metrics, it is often instructive to know the proportions of the reads consumed by the top 50 expressed genes. Moreover, an assessment of the top gene list before and after filtering can give you a good indication of whether the filtering has been successful, as the top genes are often occupied by mitochondrial genes from unhealthy cells.</p>
 <p>We can calculate the top 50 expressed genes for all cells as shown below.</p>
 <pre class="r"><code>## We will go to each column of the matrix, and divide the column by its sum
@@ -741,68 +738,71 @@ dim(liver_new2)</code></pre>
 ## other attached packages:
 ##  [1] forcats_0.4.0               stringr_1.4.0              
 ##  [3] scales_1.0.0                DropletUtils_1.6.0         
-##  [5] monocle_2.14.0              DDRTree_0.1.5              
-##  [7] irlba_2.3.3                 VGAM_1.1-1                 
-##  [9] Matrix_1.2-17               plyr_1.8.4                 
-## [11] ggpubr_0.2.3                magrittr_1.5               
-## [13] viridis_0.5.1               viridisLite_0.3.0          
-## [15] MAST_1.12.0                 ggplot2_3.2.1              
-## [17] cluster_2.1.0               Rtsne_0.15                 
-## [19] mclust_5.4.5                scdney_0.1.5               
-## [21] edgeR_3.28.0                limma_3.42.0               
-## [23] dplyr_0.8.3                 SingleCellExperiment_1.8.0 
-## [25] SummarizedExperiment_1.16.0 DelayedArray_0.12.0        
-## [27] BiocParallel_1.20.0         matrixStats_0.55.0         
-## [29] Biobase_2.46.0              GenomicRanges_1.38.0       
-## [31] GenomeInfoDb_1.22.0         IRanges_2.20.0             
-## [33] S4Vectors_0.24.0            BiocGenerics_0.32.0        
+##  [5] scClassify_0.2.0            monocle_2.14.0             
+##  [7] DDRTree_0.1.5               irlba_2.3.3                
+##  [9] VGAM_1.1-1                  Matrix_1.2-17              
+## [11] plyr_1.8.4                  ggpubr_0.2.3               
+## [13] magrittr_1.5                viridis_0.5.1              
+## [15] viridisLite_0.3.0           MAST_1.12.0                
+## [17] ggplot2_3.2.1               cluster_2.1.0              
+## [19] Rtsne_0.15                  mclust_5.4.5               
+## [21] scdney_0.1.5                edgeR_3.28.0               
+## [23] limma_3.42.0                dplyr_0.8.3                
+## [25] SingleCellExperiment_1.8.0  SummarizedExperiment_1.16.0
+## [27] DelayedArray_0.12.0         BiocParallel_1.20.0        
+## [29] matrixStats_0.55.0          Biobase_2.46.0             
+## [31] GenomicRanges_1.38.0        GenomeInfoDb_1.22.0        
+## [33] IRanges_2.20.0              S4Vectors_0.24.0           
+## [35] BiocGenerics_0.32.0        
 ## 
 ## loaded via a namespace (and not attached):
 ##   [1] utf8_1.1.4             R.utils_2.9.0          tidyselect_0.2.5      
 ##   [4] lme4_1.1-21            htmlwidgets_1.5.1      grid_3.6.1            
 ##   [7] combinat_0.0-8         docopt_0.6.1           munsell_0.5.0         
-##  [10] codetools_0.2-16       withr_2.1.2            colorspace_1.4-1      
-##  [13] fastICA_1.2-2          knitr_1.25             rstudioapi_0.10       
-##  [16] DescTools_0.99.29      ggsignif_0.6.0         pbmcapply_1.5.0       
-##  [19] labeling_0.3           slam_0.1-45            GenomeInfoDbData_1.2.2
-##  [22] polyclip_1.10-0        farver_1.1.0           pheatmap_1.0.12       
-##  [25] rhdf5_2.30.0           vctrs_0.2.0            generics_0.0.2        
-##  [28] ipred_0.9-9            xfun_0.10              randomForest_4.6-14   
-##  [31] R6_2.4.0               doParallel_1.0.15      graphlayouts_0.5.0    
-##  [34] locfit_1.5-9.1         bitops_1.0-6           assertthat_0.2.1      
-##  [37] ggraph_2.0.0           nnet_7.3-12            gtable_0.3.0          
-##  [40] tidygraph_1.1.2        timeDate_3043.102      rlang_0.4.1           
-##  [43] zeallot_0.1.0          lazyeval_0.2.2         ModelMetrics_1.2.2    
-##  [46] acepack_1.4.1          broom_0.5.2            checkmate_1.9.4       
-##  [49] yaml_2.2.0             reshape2_1.4.3         abind_1.4-5           
-##  [52] backports_1.1.5        Hmisc_4.2-0            caret_6.0-84          
-##  [55] tools_3.6.1            lava_1.6.6             clusteval_0.1         
-##  [58] ellipsis_0.3.0         RColorBrewer_1.1-2     proxy_0.4-23          
-##  [61] ggridges_0.5.1         Rcpp_1.0.2             base64enc_0.1-3       
-##  [64] zlibbioc_1.32.0        purrr_0.3.3            RCurl_1.95-4.12       
-##  [67] densityClust_0.3       rpart_4.1-15           cowplot_1.0.0         
-##  [70] ggrepel_0.8.1          data.table_1.12.6      RANN_2.6.1            
-##  [73] mvtnorm_1.0-11         mitml_0.3-7            amap_0.8-17           
-##  [76] evaluate_0.14          sparsesvd_0.2          gridExtra_2.3         
-##  [79] HSMMSingleCell_1.5.0   compiler_3.6.1         tibble_2.1.3          
-##  [82] mice_3.6.0             crayon_1.3.4           minqa_1.2.4           
-##  [85] R.oo_1.22.0            htmltools_0.4.0        segmented_1.0-0       
-##  [88] Formula_1.2-3          snow_0.4-3             tidyr_1.0.0           
-##  [91] expm_0.999-4           lubridate_1.7.4        tweenr_1.0.1          
-##  [94] MASS_7.3-51.4          boot_1.3-23            cli_1.1.0             
-##  [97] R.methodsS3_1.7.1      pan_1.6                gower_0.2.1           
-## [100] igraph_1.2.4.1         pkgconfig_2.0.3        foreign_0.8-72        
-## [103] recipes_0.1.7          hopach_2.46.0          foreach_1.4.7         
-## [106] dqrng_0.2.1            XVector_0.26.0         minpack.lm_1.2-1      
-## [109] prodlim_2018.04.18     digest_0.6.22          rmarkdown_1.16        
-## [112] htmlTable_1.13.2       dendextend_1.12.0      jomo_2.6-9            
-## [115] nloptr_1.2.1           lifecycle_0.1.0        nlme_3.1-141          
-## [118] Rhdf5lib_1.8.0         fansi_0.4.0            pillar_1.4.2          
-## [121] lattice_0.20-38        survival_2.44-1.1      glue_1.3.1            
-## [124] qlcMatrix_0.9.7        FNN_1.1.3              iterators_1.0.12      
-## [127] ggforce_0.3.1          class_7.3-15           stringi_1.4.3         
-## [130] HDF5Array_1.14.0       mixtools_1.1.0         doSNOW_1.0.18         
-## [133] latticeExtra_0.6-28    e1071_1.7-2</code></pre>
+##  [10] codetools_0.2-16       statmod_1.4.32         withr_2.1.2           
+##  [13] colorspace_1.4-1       fastICA_1.2-2          highr_0.8             
+##  [16] knitr_1.25             rstudioapi_0.10        DescTools_0.99.29     
+##  [19] ggsignif_0.6.0         pbmcapply_1.5.0        labeling_0.3          
+##  [22] slam_0.1-45            GenomeInfoDbData_1.2.2 polyclip_1.10-0       
+##  [25] farver_1.1.0           pheatmap_1.0.12        rhdf5_2.30.0          
+##  [28] vctrs_0.2.0            generics_0.0.2         ipred_0.9-9           
+##  [31] xfun_0.10              randomForest_4.6-14    diptest_0.75-7        
+##  [34] R6_2.4.0               doParallel_1.0.15      graphlayouts_0.5.0    
+##  [37] locfit_1.5-9.1         bitops_1.0-6           assertthat_0.2.1      
+##  [40] ggraph_2.0.0           nnet_7.3-12            gtable_0.3.0          
+##  [43] tidygraph_1.1.2        timeDate_3043.102      rlang_0.4.1           
+##  [46] zeallot_0.1.0          lazyeval_0.2.2         ModelMetrics_1.2.2    
+##  [49] acepack_1.4.1          broom_0.5.2            checkmate_1.9.4       
+##  [52] yaml_2.2.0             reshape2_1.4.3         abind_1.4-5           
+##  [55] backports_1.1.5        Hmisc_4.2-0            caret_6.0-84          
+##  [58] tools_3.6.1            lava_1.6.6             clusteval_0.1         
+##  [61] ellipsis_0.3.0         RColorBrewer_1.1-2     proxy_0.4-23          
+##  [64] ggridges_0.5.1         Rcpp_1.0.2             base64enc_0.1-3       
+##  [67] zlibbioc_1.32.0        purrr_0.3.3            RCurl_1.95-4.12       
+##  [70] densityClust_0.3       rpart_4.1-15           cowplot_1.0.0         
+##  [73] ggrepel_0.8.1          data.table_1.12.6      RANN_2.6.1            
+##  [76] mvtnorm_1.0-11         mitml_0.3-7            amap_0.8-17           
+##  [79] evaluate_0.14          sparsesvd_0.2          gridExtra_2.3         
+##  [82] HSMMSingleCell_1.5.0   compiler_3.6.1         tibble_2.1.3          
+##  [85] mice_3.6.0             crayon_1.3.4           R.oo_1.22.0           
+##  [88] minqa_1.2.4            htmltools_0.4.0        proxyC_0.1.5          
+##  [91] segmented_1.0-0        mgcv_1.8-29            Formula_1.2-3         
+##  [94] snow_0.4-3             tidyr_1.0.0            expm_0.999-4          
+##  [97] RcppParallel_4.4.4     lubridate_1.7.4        tweenr_1.0.1          
+## [100] MASS_7.3-51.4          boot_1.3-23            cli_1.1.0             
+## [103] R.methodsS3_1.7.1      pan_1.6                gower_0.2.1           
+## [106] igraph_1.2.4.1         pkgconfig_2.0.3        foreign_0.8-72        
+## [109] recipes_0.1.7          hopach_2.46.0          foreach_1.4.7         
+## [112] dqrng_0.2.1            XVector_0.26.0         minpack.lm_1.2-1      
+## [115] prodlim_2018.04.18     digest_0.6.22          rmarkdown_1.16        
+## [118] htmlTable_1.13.2       dendextend_1.12.0      jomo_2.6-9            
+## [121] nloptr_1.2.1           lifecycle_0.1.0        nlme_3.1-141          
+## [124] Rhdf5lib_1.8.0         fansi_0.4.0            pillar_1.4.2          
+## [127] lattice_0.20-38        survival_2.44-1.1      glue_1.3.1            
+## [130] qlcMatrix_0.9.7        FNN_1.1.3              iterators_1.0.12      
+## [133] HDF5Array_1.14.0       ggforce_0.3.1          class_7.3-15          
+## [136] stringi_1.4.3          mixtools_1.1.0         doSNOW_1.0.18         
+## [139] latticeExtra_0.6-28    e1071_1.7-2</code></pre>
 </div>
 
 

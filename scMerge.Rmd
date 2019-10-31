@@ -185,7 +185,7 @@ ggpubr::ggarrange(tsne_logcounts_cellTypes,
 
 
 
-# 1. Supervised `scMerge`
+# Supervised `scMerge`
 
 
 We will begin running `scMerge` with a simple example.
@@ -247,7 +247,7 @@ ggpubr::ggarrange(tsne_scMerge_supervised_cellTypes,
 
 
 
-# 2. Unsupervised scMerge
+# Unsupervised scMerge
 
 
 What if we do not have access to the cell type information? Can we still perform `scMerge`?

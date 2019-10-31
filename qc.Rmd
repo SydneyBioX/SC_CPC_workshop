@@ -95,7 +95,7 @@ Here, we first used `rowSums(liver)` to calculate the total counts for each gene
 
 
 
-# QC1: Waterfall plot
+# Waterfall plot
 
 The waterfall plot shows the log-count against the log-rank of each barcode. The barcodes are ranked based on the number of count each barcode has. We will compute these statistics using the `barcodeRanks` function from the `DropletUtils` package. And then we will extra the statistics and perform some plotting using the `ggplot2` package.
 
@@ -138,7 +138,7 @@ ggplot(data = barcode_data, aes(x = rank, y = total)) +
 
 Based on the waterfall plot, should we filter out any cells?
 
-# QC2: Library size
+# Library size
 
 Next, we can evaluate the total library size, that is the total read counts per cell. The library size may be used as an indicator of sequencing depth and it is a typical diagnostic for RNA-Seq data (for both the bulk and singl-cell type).
 
@@ -199,7 +199,7 @@ When we compare the distribution of librarzy size for all cells at three develop
 
 
 
-# QC3: Number of uniquely expressed genes
+# Number of uniquely expressed genes
 
 Closely related to the idea of a library size is the number of uniquly expressed genes.
 In addition to sequencing depth, we can also filter for cells that express genes with sufficiently good coverage of the transcriptome. This is to ensure that we capture cells with not only sufficient reads but also those that have reads that are relatively evenly distributed across the transcriptome. To this end, we measure the number of uniquely expressed genes in individual cells.
@@ -220,7 +220,7 @@ ggplot(cell_plotdf,
 
 From above, we can see that most cells have between 9000-10,000 detected genes. This is roughly the amount expected for high-depth scRNA-seq; however, the expected value may vary between experimental protocols, sequencing depth, and cell type used. Note that, unlike library size, a "heavy tail" can be observed for each of the distribution, indicating an unequal detection of genes across populations. Filtering out cells with low number of genes identified is another way to improve the quality of the dataset.
 
-# QC4: Mitochondrial gene expression
+# Mitochondrial gene expression
 
 Unhealthy or dying cells are associated with high expression of mitochondrial genes, and thus the proportion of mitochondrial expression is commonly used as a quality metric.
 
@@ -275,7 +275,7 @@ Filtering cells with greater than 10% of mitochondrial gene expression would rem
 2. How does the percentage of mitochondrial gene expression change over time point?
 
 
-# QC5: Contribution by the top 50 expressed genes
+# Contribution by the top 50 expressed genes
 
 As well as the above metrics, it is often instructive to know the proportions of the reads consumed by the top 50 expressed genes. Moreover, an assessment of the top gene list before and after filtering can give you a good indication of whether the filtering has been successful, as the top genes are often occupied by mitochondrial genes from unhealthy cells.
 

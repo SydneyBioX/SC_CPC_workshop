@@ -361,9 +361,6 @@ div.tocify {
   <a href="downstream.html">Downstream Analysis</a>
 </li>
 <li>
-  <a href="scClassify.html">scClassify</a>
-</li>
-<li>
   <a href="acknowledgement.html">Acknowledgement</a>
 </li>
       </ul>
@@ -617,7 +614,7 @@ ggpubr::ggarrange(tsne_logcounts_cellTypes,
 </div>
 </div>
 <div id="supervised-scmerge" class="section level1">
-<h1><span class="header-section-number">4</span> 1. Supervised <code>scMerge</code></h1>
+<h1><span class="header-section-number">4</span> Supervised <code>scMerge</code></h1>
 <p>We will begin running <code>scMerge</code> with a simple example.</p>
 <p>Remember that one of our evaluation metric is to bring the Hepatoblast cells from these two batches to be closer to each other. The way that <code>scMerge</code> achieves this is to consider cells that are similar to each other to be <strong>pseudo-replicates</strong> of each other. In our example, that means we should consider Hepatoblast cells from the Su dataset to be pseudo-replicates of the Hepatoblast cells in the Yang dataset. Once this is established, we can consider the noise that exists between these two groups of Hepatoblast cells to be the noise that we should remove from the data. This noise is estimated from the Stably Expressed Genes (SEGs), which is a list of genes that we have found to be highly expressed and stable across multiple datasets. Ultimately, we remove this noise component from the data and arrive at a merged dataset.</p>
 <p>Other inputs of the <code>scMerge</code> function include</p>
@@ -678,7 +675,7 @@ ggpubr::ggarrange(tsne_scMerge_supervised_cellTypes,
 <p><img src="scMerge_files/figure-html/unnamed-chunk-7-1.png" width="1152" /></p>
 </div>
 <div id="unsupervised-scmerge" class="section level1">
-<h1><span class="header-section-number">5</span> 2. Unsupervised scMerge</h1>
+<h1><span class="header-section-number">5</span> Unsupervised scMerge</h1>
 <p>What if we do not have access to the cell type information? Can we still perform <code>scMerge</code>?</p>
 <p>The answer is yes! In the absence of true cell type information, <code>scMerge</code> will perform clustering in the background to assign the cells with cluster labels. These cluster labels closely mimick the true cell type labels and a similar merge performance can be attained.</p>
 <p>Below is the code for the unsupervised version of <code>scMerge</code>. Instead of supplying the <code>cell_type</code> parameter, we will use the <code>kmeansK</code> parameter. The <code>kmeansK</code> parameter should be a vector that matches the number of batches in our <code>sce_combine</code> data (in this case, 2). The first number in <code>kmeansK</code> should be the number of expected cell types in the first batch (Su) and the second number should be the number of expected cell types in the second batch. In our case, we already know from the data table that there are 6 and 2 celltypes in the Su and Yang data respectively, hence we should specify <code>kmeansK = c(6, 2)</code>.</p>
@@ -880,9 +877,9 @@ ggpubr::ggarrange(tsne_scMerge_fast_cellTypes, tsne_scMerge_fast_batch, ncol = 2
 ## 
 ## other attached packages:
 ##  [1] tidyr_1.0.0                 scater_1.14.0              
-##  [3] scMerge_1.2.0               scClassify_0.2.0           
-##  [5] forcats_0.4.0               stringr_1.4.0              
-##  [7] scales_1.0.0                DropletUtils_1.6.0         
+##  [3] scMerge_1.2.0               forcats_0.4.0              
+##  [5] stringr_1.4.0               scales_1.0.0               
+##  [7] DropletUtils_1.6.0          scClassify_0.2.0           
 ##  [9] monocle_2.14.0              DDRTree_0.1.5              
 ## [11] irlba_2.3.3                 VGAM_1.1-1                 
 ## [13] Matrix_1.2-17               plyr_1.8.4                 
