@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Sydney Precision Bioinformatics Group" />
+
+<meta name="date" content="2019-11-04" />
+
+<title>scClassify</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">SingleCellPlus - CPC</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="qc.html">QC Process</a>
+</li>
+<li>
+  <a href="scMerge.html">scMerge</a>
+</li>
+<li>
+  <a href="downstream.html">Downstream Analysis</a>
+</li>
+<li>
+  <a href="scClassify.html">scClassify</a>
+</li>
+<li>
+  <a href="acknowledgement.html">Acknowledgement</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+<div class="btn-group pull-right">
+<button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+</ul>
+</div>
+
+
+
+<h1 class="title toc-ignore">scClassify</h1>
+<h4 class="author">Sydney Precision Bioinformatics Group</h4>
+<h4 class="date">04 November 2019</h4>
+
+</div>
+
+
+<pre class="r"><code>library(SingleCellExperiment)
+library(ggplot2)
+library(Rtsne)
+sce_liver &lt;- readRDS(&quot;./data/liver_scMerge.rds&quot;)
+
+ids &lt;- colData(sce_liver)$batch %in% c(&quot;GSE87795&quot;, &quot;GSE90047&quot;)
+subset_data &lt;- sce_liver[,ids]</code></pre>
+<div id="extension-can-we-use-the-data-as-reference-for-future-cell-type-classification" class="section level1">
+<h1><span class="header-section-number">1</span> Extension: Can we use the data as reference for future cell type classification?</h1>
+<p>A common application of single-cell RNA sequencing (RNA-seq) data is to identify discrete cell types. To take advantage of the large collection of well-annotated scRNA-seq datasets, scClassify package implements a set of methods to perform accurate cell type classification based on ensemble learning and sample size calculation.</p>
+<p>The code below shows an example how to utilise a subset of data as reference data and then classify on the remain data.</p>
+<pre class="r"><code>library(scClassify)
+
+exprsMat_liver &lt;- assay(subset_data, &quot;scMerge&quot;)
+
+set.seed(2019)
+
+# subsample 80% of the data as training dataset, and rest as test
+idx &lt;- sample(ncol(exprsMat_liver), round(ncol(exprsMat_liver) * 0.8))
+
+liver_exprsMat_train &lt;- exprsMat_liver[, idx]
+liver_exprsMat_test &lt;- exprsMat_liver[, -idx]
+
+liver_cellTypes_train &lt;- subset_data$cellTypes[idx]
+liver_cellTypes_test &lt;- subset_data$cellTypes[-idx]
+
+
+table(liver_cellTypes_train)</code></pre>
+<pre><code>## liver_cellTypes_train
+##          cholangiocyte       Endothelial Cell          Hematopoietic 
+##                     83                     44                    117 
+## hepatoblast/hepatocyte            Immune cell       Mesenchymal Cell 
+##                    321                     44                     61</code></pre>
+<p>We first perform non-ensemble scClassify by using 80% data as our reference dataset. We use <code>WKNN</code> as the KNN algorithm, <code>DE</code> (differential expression genes) as the gene selection method, and lastly pearson as the similarity calculation method.</p>
+<pre class="r"><code>trainLiver &lt;- scClassify::train_scClassify(exprsMat_train = liver_exprsMat_train, 
+                                           cellTypes_train = liver_cellTypes_train,
+                                           algorithm = &quot;WKNN&quot;,
+                                           selectFeatures = c(&quot;limma&quot;),
+                                           similarity = c(&quot;pearson&quot;),
+                                           returnList = FALSE,
+                                           verbose = TRUE)</code></pre>
+<pre><code>## after filtering not expressed genes 
+## [1] 22864   670
+## [1] &quot;Feature Selection...&quot;
+## [1] &quot;Number of genes selected to construct HOPACH tree 300&quot;
+## [1] &quot;Constructing tree ...&quot;
+## [1] &quot;Training....&quot;
+## [1] &quot;============ selecting features by: limma ============&quot;</code></pre>
+<pre class="r"><code>trainLiver</code></pre>
+<pre><code>## Class: scClassifyTrainModel 
+## Model name: training 
+## Feature selection methods: limma 
+## Number of cells in the training data: 670 
+## Number of cell types in the training data: 6</code></pre>
+<p>We can visualise the cell type hirearchy tree using <code>plotCellTypeTree()</code>:</p>
+<pre class="r"><code>scClassify::plotCellTypeTree(trainLiver@cellTypeTree)</code></pre>
+<p><img src="scClassify_files/figure-html/unnamed-chunk-4-1.png" width="1152" /></p>
+<p>Next, we perform <code>predict_scClassify()</code> with our trained model <code>trainRes = trainLiver</code> to predict the cell types of our query data matrix <code>liver_exprsMat_test</code>. Here, we used <code>pearson</code> as similarity metrics.</p>
+<pre class="r"><code>pred_res &lt;- scClassify::predict_scClassify(exprsMat_test = liver_exprsMat_test, 
+                               cellTypes_test = liver_cellTypes_test,
+                               trainRes = trainLiver,
+                               algorithm = &quot;WKNN&quot;,
+                               features = c(&quot;limma&quot;),
+                               similarity = c(&quot;pearson&quot;),
+                               prob_threshold = 0.7,
+                               verbose = TRUE)</code></pre>
+<pre><code>## Ensemble learning is disabled... 
+## Using parameters: 
+## similarity  algorithm   features 
+##  &quot;pearson&quot;     &quot;WKNN&quot;    &quot;limma&quot; 
+## [1] &quot;Using dynamic correlation cutoff...&quot;
+## [1] &quot;Using dynamic correlation cutoff...&quot;
+## [1] &quot;Using dynamic correlation cutoff...&quot;
+## classify_res
+##                correct   correctly unassigned           intermediate 
+##             0.91017964             0.00000000             0.02994012 
+## incorrectly unassigned         error assigned          misclassified 
+##             0.01197605             0.00000000             0.04790419</code></pre>
+<pre class="r"><code>scClassify_res &lt;- pred_res$pearson_WKNN_limma$predRes</code></pre>
+<p>Check predicting results with the original labels.</p>
+<pre class="r"><code># create tsne object
+set.seed(123)
+tsne_result_test = Rtsne::Rtsne(t(liver_exprsMat_test), check_duplicates = FALSE)
+
+#################################################
+
+plot_data = data.frame(
+  tsne1 = rep(tsne_result_test$Y[,1], 2),
+  tsne2 = rep(tsne_result_test$Y[,2], 2),
+  cluster = factor(c(liver_cellTypes_test, scClassify_res)),
+  label = rep(c(&quot;Truth&quot;, &quot;scClassify&quot;), each = length(liver_cellTypes_test)))
+
+
+ggplot(plot_data, aes(x = tsne1, y = tsne2, colour = cluster)) +
+  geom_point(size = 2) +
+  labs(title = &quot;t-SNE plot&quot;) +
+  facet_grid(~label) +
+  theme(legend.position = &quot;bottom&quot;)</code></pre>
+<p><img src="scClassify_files/figure-html/unnamed-chunk-6-1.png" width="1152" /></p>
+<pre class="r"><code>tab &lt;- table(pred_res$pearson_WKNN_limma$predRes, liver_cellTypes_test)
+knitr::kable(tab)</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th align="right">cholangiocyte</th>
+<th align="right">Endothelial Cell</th>
+<th align="right">Hematopoietic</th>
+<th align="right">hepatoblast/hepatocyte</th>
+<th align="right">Immune cell</th>
+<th align="right">Mesenchymal Cell</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>cholangiocyte</td>
+<td align="right">17</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td>Endothelial Cell</td>
+<td align="right">0</td>
+<td align="right">8</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">2</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td>Hematopoietic</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">27</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td>hepatoblast/hepatocyte</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">73</td>
+<td align="right">0</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td>hepatoblast/hepatocyte_cholangiocyte</td>
+<td align="right">3</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">1</td>
+</tr>
+<tr class="even">
+<td>Immune cell</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">2</td>
+<td align="right">0</td>
+<td align="right">3</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td>Immune cell_Mesenchymal Cell_Hematopoietic</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">2</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td>Mesenchymal Cell</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">24</td>
+</tr>
+<tr class="odd">
+<td>unassigned</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">2</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="session-info" class="section level1">
+<h1><span class="header-section-number">2</span> Session Info</h1>
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>## R version 3.6.1 (2019-07-05)
+## Platform: x86_64-apple-darwin15.6.0 (64-bit)
+## Running under: macOS Mojave 10.14.6
+## 
+## Matrix products: default
+## BLAS:   /Library/Frameworks/R.framework/Versions/3.6/Resources/lib/libRblas.0.dylib
+## LAPACK: /Library/Frameworks/R.framework/Versions/3.6/Resources/lib/libRlapack.dylib
+## 
+## locale:
+## [1] en_AU.UTF-8/en_AU.UTF-8/en_AU.UTF-8/C/en_AU.UTF-8/en_AU.UTF-8
+## 
+## attached base packages:
+##  [1] splines   parallel  stats4    stats     graphics  grDevices utils    
+##  [8] datasets  methods   base     
+## 
+## other attached packages:
+##  [1] scClassify_0.2.0            forcats_0.4.0              
+##  [3] stringr_1.4.0               scales_1.0.0               
+##  [5] DropletUtils_1.6.0          monocle_2.14.0             
+##  [7] DDRTree_0.1.5               irlba_2.3.3                
+##  [9] VGAM_1.1-1                  Matrix_1.2-17              
+## [11] plyr_1.8.4                  ggpubr_0.2.3               
+## [13] magrittr_1.5                viridis_0.5.1              
+## [15] viridisLite_0.3.0           MAST_1.12.0                
+## [17] ggplot2_3.2.1               cluster_2.1.0              
+## [19] Rtsne_0.15                  mclust_5.4.5               
+## [21] scdney_0.1.5                edgeR_3.28.0               
+## [23] limma_3.42.0                dplyr_0.8.3                
+## [25] SingleCellExperiment_1.8.0  SummarizedExperiment_1.16.0
+## [27] DelayedArray_0.12.0         BiocParallel_1.20.0        
+## [29] matrixStats_0.55.0          Biobase_2.46.0             
+## [31] GenomicRanges_1.38.0        GenomeInfoDb_1.22.0        
+## [33] IRanges_2.20.0              S4Vectors_0.24.0           
+## [35] BiocGenerics_0.32.0        
+## 
+## loaded via a namespace (and not attached):
+##   [1] utf8_1.1.4             R.utils_2.9.0          tidyselect_0.2.5      
+##   [4] lme4_1.1-21            htmlwidgets_1.5.1      grid_3.6.1            
+##   [7] combinat_0.0-8         docopt_0.6.1           munsell_0.5.0         
+##  [10] codetools_0.2-16       statmod_1.4.32         withr_2.1.2           
+##  [13] colorspace_1.4-1       fastICA_1.2-2          highr_0.8             
+##  [16] knitr_1.25             rstudioapi_0.10        DescTools_0.99.29     
+##  [19] ggsignif_0.6.0         pbmcapply_1.5.0        labeling_0.3          
+##  [22] slam_0.1-45            GenomeInfoDbData_1.2.2 polyclip_1.10-0       
+##  [25] farver_1.1.0           pheatmap_1.0.12        rhdf5_2.30.0          
+##  [28] vctrs_0.2.0            generics_0.0.2         ipred_0.9-9           
+##  [31] xfun_0.10              randomForest_4.6-14    diptest_0.75-7        
+##  [34] R6_2.4.0               doParallel_1.0.15      graphlayouts_0.5.0    
+##  [37] locfit_1.5-9.1         bitops_1.0-6           assertthat_0.2.1      
+##  [40] ggraph_2.0.0           nnet_7.3-12            gtable_0.3.0          
+##  [43] tidygraph_1.1.2        timeDate_3043.102      rlang_0.4.1           
+##  [46] zeallot_0.1.0          lazyeval_0.2.2         ModelMetrics_1.2.2    
+##  [49] acepack_1.4.1          broom_0.5.2            checkmate_1.9.4       
+##  [52] yaml_2.2.0             reshape2_1.4.3         abind_1.4-5           
+##  [55] backports_1.1.5        Hmisc_4.2-0            caret_6.0-84          
+##  [58] tools_3.6.1            lava_1.6.6             clusteval_0.1         
+##  [61] ellipsis_0.3.0         RColorBrewer_1.1-2     proxy_0.4-23          
+##  [64] ggridges_0.5.1         Rcpp_1.0.2             base64enc_0.1-3       
+##  [67] zlibbioc_1.32.0        purrr_0.3.3            RCurl_1.95-4.12       
+##  [70] densityClust_0.3       rpart_4.1-15           cowplot_1.0.0         
+##  [73] ggrepel_0.8.1          data.table_1.12.6      RANN_2.6.1            
+##  [76] mvtnorm_1.0-11         mitml_0.3-7            amap_0.8-17           
+##  [79] evaluate_0.14          sparsesvd_0.2          gridExtra_2.3         
+##  [82] HSMMSingleCell_1.5.0   compiler_3.6.1         tibble_2.1.3          
+##  [85] mice_3.6.0             crayon_1.3.4           proxyC_0.1.5          
+##  [88] minqa_1.2.4            R.oo_1.22.0            htmltools_0.4.0       
+##  [91] mgcv_1.8-29            segmented_1.0-0        Formula_1.2-3         
+##  [94] snow_0.4-3             tidyr_1.0.0            expm_0.999-4          
+##  [97] RcppParallel_4.4.4     lubridate_1.7.4        tweenr_1.0.1          
+## [100] MASS_7.3-51.4          boot_1.3-23            cli_1.1.0             
+## [103] R.methodsS3_1.7.1      pan_1.6                gower_0.2.1           
+## [106] igraph_1.2.4.1         pkgconfig_2.0.3        foreign_0.8-72        
+## [109] recipes_0.1.7          hopach_2.46.0          foreach_1.4.7         
+## [112] dqrng_0.2.1            XVector_0.26.0         minpack.lm_1.2-1      
+## [115] prodlim_2018.04.18     digest_0.6.22          rmarkdown_1.16        
+## [118] htmlTable_1.13.2       dendextend_1.12.0      jomo_2.6-9            
+## [121] nloptr_1.2.1           lifecycle_0.1.0        nlme_3.1-141          
+## [124] Rhdf5lib_1.8.0         fansi_0.4.0            pillar_1.4.2          
+## [127] lattice_0.20-38        survival_2.44-1.1      glue_1.3.1            
+## [130] qlcMatrix_0.9.7        FNN_1.1.3              iterators_1.0.12      
+## [133] ggforce_0.3.1          class_7.3-15           stringi_1.4.3         
+## [136] HDF5Array_1.14.0       mixtools_1.1.0         doSNOW_1.0.18         
+## [139] latticeExtra_0.6-28    e1071_1.7-2</code></pre>
+</div>
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("show" === "show");
+});
+</script>
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
