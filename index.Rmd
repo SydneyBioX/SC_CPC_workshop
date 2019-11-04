@@ -42,12 +42,20 @@ source("/home/user_setup.R")
 
 ## Running workshop locally
 
-Please try to download and install:
+  1. Please download and install:
 
   + Latest `R` from https://cloud.r-project.org/ 
   + Latest `RStudio` from https://www.rstudio.com/products/rstudio/download/
-  + Download the data from https://storage.googleapis.com/scp_data/data.zip
-  + Install all the necessary packages by running [this script](https://raw.githubusercontent.com/SydneyBioX/SC_CPC_workshop/master/install.R)
+  
+  
+  1. In your RStudio console pane, please install all the necessary packages by running [this script](https://raw.githubusercontent.com/SydneyBioX/SC_CPC_workshop/master/install.R). This will take a while. 
+
+  1. Download all the the workshop materials from [this zip file](https://github.com/SydneyBioX/SC_CPC_workshop/archive/master.zip) and unzip it on your Desktop. You should have a folder with the name `/desktop/SC_CPC_workshop-master` created.
+  
+  1. Download the data from [this zip file](https://storage.googleapis.com/scp_data/data.zip) and unzip this file under `/desktop/SC_CPC_workshop-master`, so that you should have a folder created as `/desktop/SC_CPC_workshop-master/data`. 
+  
+  1. Open up `/desktop/SC_CPC_workshop-master/SC_CPC_workshop.Rproj` and you should be able to run every `.Rmd` file in the workshop now. 
+
 
 # Clipboard
 
