@@ -365,6 +365,8 @@ ggpubr::ggarrange(tsne_scMerge_hept_unsupervised, tsne_scMerge_hept_semisupervis
 The second component of scMerge contains some intense computations. For a large dataset, this component is slow. In order to fix this, we have implemented fast computational approximations for this component. While the output is only an approximation, it is usually numerically similar to a full run of scMerge and it can be up to 10 times faster for a large dataset.
 
 ```{r, eval = FALSE, fig.width=5, fig.height=5}
+library(BiocParallel)
+library(BiocSingular)
 scMerge_fast = scMerge(
   sce_combine = sce_combine,
   ctl = which(rownames(sce_combine) %in% segList_ensemblGeneID$mouse$mouse_scSEG),
@@ -372,8 +374,8 @@ scMerge_fast = scMerge(
   replicate_prop = 1,
   assay_name = "scMerge_fast",
   verbose = TRUE,
-  fast_svd = TRUE,
-  rsvd_prop = 0.1)
+  BSPARAM = IrlbaParam(), 
+  svd_k = 20)
 ```
 
 
