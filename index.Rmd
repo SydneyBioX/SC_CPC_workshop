@@ -13,7 +13,7 @@ This workshop is funded by "Single Cell Plus", a research initiative between Hon
 
 # Slides
 
-You can find the workshop slides [here](https://docs.google.com/presentation/d/1LSbZLW16zXhpfmk6p5nhU0uEbFcP_AxDpgit10ETFRw/edit?usp=sharing). 
+You can find the workshop slides [here](slides.pdf). 
 
 # Aim of this workshop
 
