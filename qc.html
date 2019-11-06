@@ -441,7 +441,7 @@ table(stage)</code></pre>
 ##    70   100    71    99    78    58    31</code></pre>
 <div id="a-quick-pre-processing-of-the-matrix" class="section level2">
 <h2><span class="header-section-number">2.1</span> A quick pre-processing of the matrix</h2>
-<p>A simple way to make single-cell datasets manageable for analysis is to remove genes that are not expressed in any cells (i.e. genes that have zero counts across all cells). Since these genes do not containn any measurable signals, removing them does not affect the downstream analysis. In addition, a smaller dataset actually improves the performance and speed of most algorithms.</p>
+<p>A simple way to make single-cell datasets manageable for analysis is to remove genes that are not expressed in any cells (i.e. genes that have zero counts across all cells). Since these genes do not contain any measurable signals, removing them does not affect the downstream analysis. In addition, a smaller dataset actually improves the performance and speed of most algorithms.</p>
 <pre class="r"><code>liver = liver[rowSums(liver) != 0, ]
 dim(liver)</code></pre>
 <pre><code>## [1] 37766   507</code></pre>
@@ -457,13 +457,13 @@ dim(liver)</code></pre>
 </div>
 <div id="waterfall-plot" class="section level1">
 <h1><span class="header-section-number">3</span> Waterfall plot</h1>
-<p>The waterfall plot shows the log-count against the log-rank of each barcode. The barcodes are ranked based on the number of count each barcode has. We will compute these statistics using the <code>barcodeRanks</code> function from the <code>DropletUtils</code> package. And then we will extra the statistics and perform some plotting using the <code>ggplot2</code> package.</p>
+<p>The waterfall plot shows the log-count against the log-rank of each barcode. The barcodes are ranked based on the number of counts each barcode has. We will compute these statistics using the <code>barcodeRanks</code> function from the <code>DropletUtils</code> package. And then we will extract the statistics and perform some plotting using the <code>ggplot2</code> package.</p>
 <p>The waterfall plots show two points of interest:</p>
 <ul>
 <li><strong>inflection point</strong> is the point on the curve where the first derivative is minimised</li>
 <li><strong>knee point</strong> is the point where the signed curvature is minimised</li>
 </ul>
-<p>These two points potentially indicate empty droplets (background barcodes). To elaborate on this concept, it is helpful to know that for microfluidic sequencing systems each droplet contains a bead and each bead are marked uniquely with a barcode. Intuitively, we can consider a droplet and the barcode associated with it as being a unique cell. Due to the technology, however, sometimes the droplet don’t always contain a cell, or it might contain multiples cells. We can now use the waterfall plot to detect those empty droplets. The barcodes with the number of counts dropping rapidly beyond knee point may suggest empty reads.</p>
+<p>These two points potentially indicate empty droplets (background barcodes). To elaborate on this concept, it is helpful to know that for microfluidic sequencing systems each droplet contains a bead and each bead is marked uniquely with a barcode. Intuitively, we can consider a droplet and the barcode associated with it as being a unique cell. Due to limitation of the technology, sometimes the droplet doesn’t always contain a cell, or it might contain multiples cells (which we will not explore here). We can now use the waterfall plot to detect those empty droplets. The barcodes with the number of counts dropping rapidly beyond the knee point may suggest empty reads.</p>
 <pre class="r"><code>barcode = DropletUtils::barcodeRanks(liver)
 barcode_data = as.data.frame(barcode)
 
@@ -493,7 +493,7 @@ ggplot(data = barcode_data, aes(x = rank, y = total)) +
 <div id="library-size" class="section level1">
 <h1><span class="header-section-number">4</span> Library size</h1>
 <p>Next, we can evaluate the total library size, that is the total read counts per cell. The library size may be used as an indicator of sequencing depth and it is a typical diagnostic for RNA-Seq data (for both the bulk and singl-cell type).</p>
-<p>A small library size for a cell may suggest abnormalies and lack of captured signals. In such a case, the cells with usually small library size should be removed.</p>
+<p>A small library size for a cell may suggest abnormalies and lack of captured signals. In such a case, the cells with unusually small library size should be removed.</p>
 <p>We will begin with a <code>data.frame</code> capturing the characteristics of each column <code>cell_plotdf_full</code> and then perform plotting with <code>ggplot2</code>. This <code>cell_plotdf_full</code> has four columns:</p>
 <ol style="list-style-type: decimal">
 <li><code>cell_name</code>: The name of each cell in the data</li>
@@ -547,11 +547,11 @@ cell_plotdf_mean</code></pre>
        y = &quot;density&quot;) +
   facet_wrap(~ stage, ncol = 3)</code></pre>
 <p><img src="qc_files/figure-html/unnamed-chunk-6-1.png" width="768" /></p>
-<p>When we compare the distribution of librarzy size for all cells at three developmental stages, we can see that mean library size is lowest in E11.5 cells (mean = 2.838642 million) and highest in E13.5 cells (mean = 3.639297 million). E12.5 cells (mean = 3.094663 million) have a greater distribution of cells with few reads. Cells with very few reads are likely to have failed to capture the transcriptome of a cell, and thus should be filtered.</p>
+<p>When we compare the distribution of library size for all cells at three developmental stages, we can see that mean library size is lowest in E11.5 cells (mean = 2.838642 million) and highest in E13.5 cells (mean = 3.639297 million). E12.5 cells (mean = 3.094663 million) have a greater distribution of cells with few reads. Cells with very few reads are likely to have failed to capture the transcriptome of a cell, and thus should be filtered.</p>
 </div>
 <div id="number-of-uniquely-expressed-genes" class="section level1">
 <h1><span class="header-section-number">5</span> Number of uniquely expressed genes</h1>
-<p>Closely related to the idea of a library size is the number of uniquly expressed genes. In addition to sequencing depth, we can also filter for cells that express genes with sufficiently good coverage of the transcriptome. This is to ensure that we capture cells with not only sufficient reads but also those that have reads that are relatively evenly distributed across the transcriptome. To this end, we measure the number of uniquely expressed genes in individual cells.</p>
+<p>Closely related to the idea of a library size is the number of uniquely expressed genes. In addition to sequencing depth, we can also filter for cells that express genes with sufficiently good coverage of the transcriptome. This is to ensure that we capture cells with not only sufficient reads but also those that have reads that are relatively evenly distributed across the transcriptome. To this end, we measure the number of uniquely expressed genes in individual cells.</p>
 <pre class="r"><code>ggplot(cell_plotdf,
        aes(x = num_genes/1000, colour = stage, fill = stage)) +
   geom_histogram(aes(y = ..density..), colour = &quot;black&quot;, fill = &quot;white&quot;, bins = 30) +
@@ -651,12 +651,12 @@ liver_percent_plotdf %&gt;%
   geom_violin() +
   geom_jitter(alpha = 0.2) +
   coord_flip() +
-  labs(x = &quot;percent of library&quot;,
-       y = &quot;genes&quot;,
+  labs(x = &quot;genes&quot;,
+       y = &quot;percent of library&quot;,
        title = &quot;Top 50 genes for all cell stages&quot;) +
   theme(legend.position = &quot;none&quot;)</code></pre>
 <p><img src="qc_files/figure-html/unnamed-chunk-9-1.png" width="768" /></p>
-<p>The plot above show that there are three spike-in genes within the top 50 genes. The presence of multiple spike-ins at the top of the list may suggest that the concentration of spike-ins added to the experiment may need to be optimized for subsequent experiments. Overall, the relatively flat distributions indicate good coverage of the transcriptome.</p>
+<p>The plot above shows that there are three spike-in genes within the top 50 genes. The presence of multiple spike-ins at the top of the list may suggest that the concentration of spike-ins added to the experiment may need to be optimized for subsequent experiments. Overall, the relatively flat distributions indicate good coverage of the transcriptome.</p>
 <p>Alternatively, we can calculate the top 50 expressed genes for each stage, but we will leave this as an extension exercise.</p>
 <pre class="r"><code>liver_percent_split = split.data.frame(x = t(liver_percent), f = stage) %&gt;% lapply(t)
 
@@ -703,7 +703,7 @@ e115_liver_percent %&gt;%
 <div id="filtering" class="section level1">
 <h1><span class="header-section-number">8</span> Filtering</h1>
 <p>Here we will give a demonstration of how you can remove some of the cells from the dataset.</p>
-<p>In the <code>DropletUtils</code> package, it was recommended that we should only retain those cells above the inflection plot in the plot. So we will perform subsetiting on the cells (columns) of this data.</p>
+<p>In the <code>DropletUtils</code> package, it was recommended that we should only retain those cells above the inflection point in the plot. So we will perform subsetiting on the cells (columns) of this data.</p>
 <pre class="r"><code>table(barcode_data$total &gt;= barcode@metadata$inflection)</code></pre>
 <pre><code>## 
 ## FALSE  TRUE 

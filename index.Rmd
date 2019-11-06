@@ -30,7 +30,7 @@ At the end of this workshop you should have some basic understanding of sc-RNASe
 
 Ideally, you should be familiar with `R` and the Bioconductor. However, since this is not a programming workshop, you can still pick up important practical skills by running the codes we provided. 
 
-## Running workshop on the cloud
+## Running workshop on Google Cloud
 
 Your instructor will provide you with the links to a Google Cloud server, username and the password. Once you log in, you will have access to RStudio via a webpage. 
 
@@ -40,7 +40,7 @@ Type the following code into your console and you are good to go!
 source("/home/user_setup.R")
 ```
 
-## Running workshop locally
+## Running workshop locally {#local}
 
   1. Please download and install:
 

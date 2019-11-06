@@ -426,7 +426,7 @@ theme_set(theme_classic(16))
 </div>
 <div id="loading-data" class="section level2">
 <h2><span class="header-section-number">1.2</span> Loading data</h2>
-<p>In the scMerge publication, we have merged <a href="https://sydneybiox.github.io/scMerge/articles/case_study/Mouse_Liver_Data.html">four mouse liver datasets</a> together. This data is a bit too large for us to work with in this workshop, hence, we will take the merged data with all four datasets and subset ourselves to only the Su and Yang datasets. Some processings were performed in this data compare to the previous section, namely, the Megakaryocyte, Erythrocyte cells from the previous section are labelled as Hematopoietic cells in this section.</p>
+<p>In the scMerge publication, we have merged <a href="https://sydneybiox.github.io/scMerge/articles/case_study/Mouse_Liver_Data.html">four mouse liver datasets</a> together. This data is a bit too large for us to work with in this workshop, hence, we will take the merged data with all four datasets and subset ourselves to only the Su and Yang datasets. Some processings were performed in this data compared to the previous section, namely, the Megakaryocyte, Erythrocyte cells from the previous section are labelled as Hematopoietic cells in this section.</p>
 <pre class="r"><code>datapath = &quot;./data/&quot;
 # datapath = &quot;/home/data/&quot;
 sce_scMerge = readRDS(paste0(datapath, &quot;liver_scMerge.rds&quot;))
@@ -450,17 +450,17 @@ mat = SummarizedExperiment::assay(subset_data, &quot;scMerge&quot;)</code></pre>
 <div id="q1" class="section level1">
 <h1><span class="header-section-number">2</span> What are the cell types present in the dataset?</h1>
 <p>Typically, a single cell RNA-sequencing experiment does not come with labelled cell type information for individual cells. We will need to identify cell types of indivdual cells in our data with bioinformatics analysis.</p>
-<p>Before we identify the cell types in the dataset, we need to first identify how many distinct group of population we can find from our data. One common method to achieve this is a statistical technique called <strong>clustering</strong>. A clustering method will group similar samples (cells) together and partition samples that are different by comparing their feature information (gene expression).</p>
+<p>Before we identify the cell types in the dataset, we need to first identify how many distinct groups of populations we can find from our data. One common method to achieve this is a statistical technique called <strong>clustering</strong>. A clustering method will group similar samples (cells) together and partition samples that are different by comparing their feature information (gene expression).</p>
 <p>There are two components that ultimately determine the performance of a clustering method:</p>
 <ul>
 <li>The <strong>similarity metric</strong> that determines if two cells are similar to each other, and</li>
 <li>The <strong>algorithm</strong> itself that uses the similarity metric to perform the grouping operations.</li>
 </ul>
 <p>In our recent study, we found Pearson correlation to be the optimal similarity metric for comparing single cell RNA-seq data ( <a href="https://academic.oup.com/bib/advance-article-abstract/doi/10.1093/bib/bby076/5077112?redirectedFrom=fulltext"><em>Kim et al., 2018</em></a> ). Therefore in this workshop, we will utilise <code>scClust</code> in our <code>scdney</code> package, which implemented 2017 Nature methods clustering algorithm <code>SIMLR</code> with pearson correlation.</p>
-<div id="how-many-distinct-group-of-population-are-there-in-my-dataset" class="section level2">
-<h2><span class="header-section-number">2.1</span> How many distinct group of population are there in my dataset?</h2>
-<p>Typical clustering methods (except for some methods like hierarchical clustering) require users to specify number of distinct groups (<code>k</code>) to cluster from your data. In the context of this data, we can think of <code>k</code> as the the number of cell types.</p>
-<p>In an unsupervised setting, we do not know the exact number and therefore, in a practical setting, we should run clustering for various number of <code>k</code> and evaluate their clustering performance.</p>
+<div id="how-many-distinct-groups-of-populations-are-there-in-my-dataset" class="section level2">
+<h2><span class="header-section-number">2.1</span> How many distinct groups of populations are there in my dataset?</h2>
+<p>Typical clustering methods (except for some methods like hierarchical clustering) require users to specify the number of distinct groups (<code>k</code>) to cluster from your data. In the context of this data, we can think of <code>k</code> as the the number of cell types.</p>
+<p>In an unsupervised setting, we do not know the exact number and therefore, in a practical setting, we should run clustering for various numbers for <code>k</code> and evaluate their clustering performance.</p>
 <p><strong>However</strong>, due to the time limit of this workshop, we will only run the <code>scClust</code> clustering for <code>k = 6</code> as a demonstration and load a saved result with more values of <code>k</code> computed.</p>
 <pre class="r"><code>## For demonstration purpose, we will run k = 6 (which is actually the number of cell types in our dataset)
 simlr_result_k6 = scClust(mat, 6, similarity = &quot;pearson&quot;, method = &quot;simlr&quot;, seed = 1, cores.ratio = 0, geneFilter = 0)
@@ -477,7 +477,7 @@ simlr_results = sapply(as.character(all_k), function(k) {
 </div>
 <div id="how-do-we-select-optimal-k" class="section level2">
 <h2><span class="header-section-number">2.2</span> How do we select optimal <code>k</code>?</h2>
-<p>If our <code>k</code> is optimal, we should expect that the each cluster are closely packed together and the distances within the clusters, within-cluster sum of squares (WSS) are expected to be small. Thus, we will select the <code>k</code> with a small total WSS (compact clusters). This is called the “elbow” method.</p>
+<p>If our <code>k</code> is optimal, we should expect that each cluster is tightly packed together and the distances within the clusters, within-cluster sum of squares (WSS) are expected to be small. Thus, we will select the <code>k</code> with a small total WSS (compact clusters). This is called the “elbow” method.</p>
 <pre class="r"><code># Find total WSS from all cluster outputs
 all_wss = sapply(simlr_results, function(result) {
   sum(result$y$withinss)
@@ -497,13 +497,13 @@ ggplot(plot_data,
   labs(title = &quot;Compare Total WSS for each k&quot;,
        y = &quot;Total WSS&quot;)</code></pre>
 <p><img src="downstream_files/figure-html/unnamed-chunk-6-1.png" width="768" /></p>
-<p>As shown in this plot, the graph begin to plateau from <code>k</code> = 5. We can estimate that k is around 5 or 6. We can further investigate using silhouette scores or other metrics but using our t-SNE plot (this may require a bit of practical experience) we will estimate <code>k</code> = 6.</p>
+<p>As shown in this plot, the graph begins to plateau from <code>k</code> = 5. We can estimate that k is around 5 or 6. We can further investigate using silhouette scores or other metrics but using our t-SNE plot (this may require a bit of practical experience) we will estimate <code>k</code> = 6.</p>
 <h4>
 <span class="glyphicon glyphicon-education" aria-hidden="true"></span> Quick quiz
 </h4>
 <ol style="list-style-type: decimal">
-<li>We can determine <code>k</code> with compactness of the clusters. What other measure can we use to determine <code>k</code>?</li>
-<li>How would you determine optimal number of clusters for hierarchical clustering?</li>
+<li>We can determine <code>k</code> with compactness of the clusters. What other measures can we use to determine <code>k</code>?</li>
+<li>How would you determine the optimal number of clusters for hierarchical clustering?</li>
 </ol>
 <!-- <i class="fi-lightbulb"></i> -->
 <h4>
@@ -580,7 +580,7 @@ plot_data2 %&gt;%
 <ol style="list-style-type: decimal">
 <li>From your observation of the above t-SNE plot, did our clustering method (with Pearson correlation) group cells well?</li>
 </ol>
-<p><strong>[Optional]</strong> We can evaluate the clustering performance using the cell type labels providede from the publications.</p>
+<p><strong>[Optional]</strong> We can evaluate the clustering performance using the cell type labels provided from the publications.</p>
 <pre class="r"><code># ARI
 ari = c(mclust::adjustedRandIndex(lab, simlr_result_eucl_k6$y$cluster),
         mclust::adjustedRandIndex(lab, simlr_result_k6$y$cluster))
@@ -602,7 +602,7 @@ ggplot(plot_data, aes(x = dist, y = value, fill = dist)) +
   facet_grid(col = vars(eval)) +
   labs(x = &quot;Similarity metrics&quot;,
        y = &quot;Evalution score&quot;,
-       title = &quot;Affect of similarity metrics in scRNA-seq data&quot;) +
+       title = &quot;Effect of similarity metrics in scRNA-seq data&quot;) +
   theme(legend.position = &quot;none&quot;)</code></pre>
 <p><img src="downstream_files/figure-html/unnamed-chunk-10-1.png" width="960" /></p>
 </div>
@@ -614,8 +614,8 @@ ggplot(plot_data, aes(x = dist, y = value, fill = dist)) +
 </div>
 <div id="what-are-the-marker-genes-that-distinguish-the-different-cell-types" class="section level1">
 <h1><span class="header-section-number">4</span> What are the marker genes that distinguish the different cell types?</h1>
-<p>Here we provide a function that allow one to find differentially expressed gene between a cluster and the remaining clusters. The input of this function is the expression matrix and the cluster ID. The output is a list of marker genes and their associated p-values.</p>
-<p>Here we provide an example of using the <code>findmarker</code> function.</p>
+<p>Here we provide a function that allows one to find differentially expressed genes between a cluster and the remaining clusters. The input of this function is the expression matrix and the cluster ID. The output is a list of marker genes and their associated p-values.</p>
+<p>Here we provide an example of this using the <code>findmarker</code> function from the <code>scdney</code> package.</p>
 <p>To find out the marker genes in cluster 4, we type in <code>4</code> in the <code>findmarker</code> function. We then look at the top 10 genes ranked by p-value. We can then use <code>ggplot</code> to visualise the distribution of one of the genes across the dataset.</p>
 <pre class="r"><code>marker_cluster4 = findMarker(mat = mat,
                              cluster = simlr_result_k6$y$cluster,
@@ -665,8 +665,8 @@ ggplot(data = tsne_plotdf,
 </div>
 <div id="q3" class="section level1">
 <h1><span class="header-section-number">5</span> For a gene of interest, how can I visualise the gene expression distribution?</h1>
-<p>In Q2, we have identified some interesting marker genes from our dataset. If we have a gene that we know, and we want to identify the its expression pattern in our dataset, we can also visualise the distribution. For example, Hnf4a has been stated in literature as a marker gene for hepatoblast cell (citation).</p>
-<p>The figure on the left highlight cluster 4 and the figure on the right highlight the expression of Hnf4a.</p>
+<p>We have already identified some interesting marker genes from our dataset. If we have a gene that we know, and we want to identify its expression pattern in our dataset, we can also visualise the distribution. For example, Hnf4a has been stated in literature as a marker gene for hepatoblast cell (citation to be added).</p>
+<p>The figure on the left highlights cluster 4 and the figure on the right highlights the expression of Hnf4a.</p>
 <p>This suggests that cluster 4 could belong to hepatoblast cell.</p>
 <pre class="r"><code>tsne_plotdf = tsne_plotdf %&gt;%
   dplyr::mutate(Hnf4a = mat[&quot;Hnf4a&quot;,])
@@ -798,7 +798,7 @@ plot_genes_in_pseudotime(monocle_CellDataSet[c(&quot;Sarm1&quot;, &quot;Gm38388&
 <div id="extension-can-we-use-the-data-as-reference-for-future-cell-type-classification" class="section level1">
 <h1><span class="header-section-number">8</span> Extension: Can we use the data as reference for future cell type classification?</h1>
 <p>A common application of single-cell RNA sequencing (RNA-seq) data is to identify discrete cell types. To take advantage of the large collection of well-annotated scRNA-seq datasets, scClassify package implements a set of methods to perform accurate cell type classification based on ensemble learning and sample size calculation.</p>
-<p>The code below shows an example how to utilise a subset of data as reference data and then classify on the remain data.</p>
+<p>The code below shows an example how to utilise a subset of data as reference data and then classify on the remaining data.</p>
 <pre class="r"><code>exprsMat_liver &lt;- assay(subset_data, &quot;scMerge&quot;)
 
 set.seed(2019)
@@ -865,7 +865,7 @@ table(liver_cellTypes_train)</code></pre>
 ## incorrectly unassigned         error assigned          misclassified 
 ##             0.01197605             0.00000000             0.04790419</code></pre>
 <pre class="r"><code>scClassify_res &lt;- pred_res$pearson_WKNN_limma$predRes</code></pre>
-<p>Check predicting results with the original labels.</p>
+<p>Check prediction results with the original labels.</p>
 <pre class="r"><code># create tsne object
 set.seed(123)
 tsne_result_test = Rtsne::Rtsne(t(liver_exprsMat_test), check_duplicates = FALSE)

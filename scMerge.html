@@ -471,7 +471,7 @@ theme_set(theme_classic(16))</code></pre>
 </tbody>
 </table>
 <p>For the purpose of efficient data management, the bioinformatics community uses a <code>SingleCellExperiment</code> object to store single cell data. We have saved the Su and Yang data as two separate RDS files and we will read these data in first.</p>
-<p>Note: In the scMerge publication, we have merged <a href="https://sydneybiox.github.io/scMerge/articles/case_study/Mouse_Liver_Data.html">four mouse liver datasets</a> together. This data is a bit too large for us to work with in this workshop, hence, we will only mearge the Su and Yang datasets.</p>
+<p>Note: In the scMerge publication, we have merged <a href="https://sydneybiox.github.io/scMerge/articles/case_study/Mouse_Liver_Data.html">four mouse liver datasets</a> together. This data is a bit too large for us to work with in this workshop, hence, we will only merge the Su and Yang datasets.</p>
 <pre class="r"><code>datapath = &quot;./data/&quot;
 # datapath = &quot;/home/data/&quot;
 
@@ -542,7 +542,7 @@ sce_list</code></pre>
 <p>You can learn more about <code>SingleCellExperiment</code> objects <a href="http://bioconductor.org/packages/release/bioc/html/SingleCellExperiment.html">here</a>. In brief terms, in a <code>SingleCellExperiment</code> object, it stores three things:</p>
 <ul>
 <li><code>colData</code> which stores information about the cells</li>
-<li><code>rowData</code> which stores infornatin about the genes</li>
+<li><code>rowData</code> which stores information about the genes</li>
 <li><code>assayData</code> which stores a matrix of single cell expression data</li>
 </ul>
 <p>In the Yang data, the cell type <code>Hepatoblast</code> is coded as <code>hepatoblast/hepatocyte</code>. In order to correct for this, we will briefly manipulate the <code>colData</code>. You do not need to know precise details of what is happening, please just copy and paste this code.</p>
@@ -616,7 +616,7 @@ ggpubr::ggarrange(tsne_logcounts_cellTypes,
 <div id="supervised-scmerge" class="section level1">
 <h1><span class="header-section-number">4</span> Supervised <code>scMerge</code></h1>
 <p>We will begin running <code>scMerge</code> with a simple example.</p>
-<p>Remember that one of our evaluation metric is to bring the Hepatoblast cells from these two batches to be closer to each other. The way that <code>scMerge</code> achieves this is to consider cells that are similar to each other to be <strong>pseudo-replicates</strong> of each other. In our example, that means we should consider Hepatoblast cells from the Su dataset to be pseudo-replicates of the Hepatoblast cells in the Yang dataset. Once this is established, we can consider the noise that exists between these two groups of Hepatoblast cells to be the noise that we should remove from the data. This noise is estimated from the Stably Expressed Genes (SEGs), which is a list of genes that we have found to be highly expressed and stable across multiple datasets. Ultimately, we remove this noise component from the data and arrive at a merged dataset.</p>
+<p>Remember that one of our evaluation metrics is to bring the Hepatoblast cells from these two batches to be closer to each other. The way that <code>scMerge</code> achieves this is to consider cells that are similar to each other to be <strong>pseudo-replicates</strong> of each other. In our example, that means we should consider Hepatoblast cells from the Su dataset to be pseudo-replicates of the Hepatoblast cells in the Yang dataset. Once this is established, we can consider the noise that exists between these two groups of Hepatoblast cells to be the noise that we should remove from the data. This noise is estimated from the Stably Expressed Genes (SEGs), which is a list of genes that we have found to be highly expressed and stable across multiple datasets. Ultimately, we remove this noise component from the data and arrive at a merged dataset.</p>
 <p>Other inputs of the <code>scMerge</code> function include</p>
 <ul>
 <li><code>sce_combine</code>: is a <code>SingleCellExperiment</code> object containing a column <code>batch</code> in its colData</li>
@@ -643,7 +643,7 @@ scMerge_supervised = scMerge(
 ## [1] 837   7</code></pre>
 <pre><code>## Step 2: Performing RUV normalisation. This will take minutes to hours.</code></pre>
 <pre><code>## scMerge complete!</code></pre>
-<p>The output of the <code>scMerge</code> function is a <code>SingleCellExperiment</code> object with one extra assay, <code>scMerge_supervised</code>. And we can check the PCA visualisation to see if the merge is sensible.</p>
+<p>The output of the <code>scMerge</code> function is a <code>SingleCellExperiment</code> object with one extra assay, <code>scMerge_supervised</code>. And we can check the TSNE visualisation to see if the merge is sensible.</p>
 <pre class="r"><code>scMerge_supervised</code></pre>
 <pre><code>## class: SingleCellExperiment 
 ## dim: 23801 837 
@@ -677,7 +677,7 @@ ggpubr::ggarrange(tsne_scMerge_supervised_cellTypes,
 <div id="unsupervised-scmerge" class="section level1">
 <h1><span class="header-section-number">5</span> Unsupervised scMerge</h1>
 <p>What if we do not have access to the cell type information? Can we still perform <code>scMerge</code>?</p>
-<p>The answer is yes! In the absence of true cell type information, <code>scMerge</code> will perform clustering in the background to assign the cells with cluster labels. These cluster labels closely mimick the true cell type labels and a similar merge performance can be attained.</p>
+<p>The answer is yes! In the absence of true cell type information, <code>scMerge</code> will perform clustering in the background to assign the cells with cluster labels. These cluster labels closely mimic the true cell type labels and a similar merge performance can be attained.</p>
 <p>Below is the code for the unsupervised version of <code>scMerge</code>. Instead of supplying the <code>cell_type</code> parameter, we will use the <code>kmeansK</code> parameter. The <code>kmeansK</code> parameter should be a vector that matches the number of batches in our <code>sce_combine</code> data (in this case, 2). The first number in <code>kmeansK</code> should be the number of expected cell types in the first batch (Su) and the second number should be the number of expected cell types in the second batch. In our case, we already know from the data table that there are 6 and 2 celltypes in the Su and Yang data respectively, hence we should specify <code>kmeansK = c(6, 2)</code>.</p>
 <p>Note: in the case that you do not know what is a good guess of number of cell types, you should specify a slightly higher number.</p>
 <pre class="r"><code>scMerge_unsupervised = scMerge(
@@ -874,68 +874,111 @@ ggpubr::ggarrange(tsne_scMerge_fast_cellTypes, tsne_scMerge_fast_batch, ncol = 2
 ## [1] en_AU.UTF-8/en_AU.UTF-8/en_AU.UTF-8/C/en_AU.UTF-8/en_AU.UTF-8
 ## 
 ## attached base packages:
-## [1] parallel  stats4    stats     graphics  grDevices utils     datasets 
-## [8] methods   base     
+##  [1] splines   parallel  stats4    stats     graphics  grDevices utils    
+##  [8] datasets  methods   base     
 ## 
 ## other attached packages:
-##  [1] tidyr_1.0.0                 forcats_0.4.0              
-##  [3] ggpubr_0.2.3                magrittr_1.5               
-##  [5] dplyr_0.8.3                 scater_1.14.0              
-##  [7] ggplot2_3.2.1               SingleCellExperiment_1.8.0 
-##  [9] SummarizedExperiment_1.16.0 DelayedArray_0.12.0        
-## [11] BiocParallel_1.20.0         matrixStats_0.55.0         
-## [13] Biobase_2.46.0              GenomicRanges_1.38.0       
-## [15] GenomeInfoDb_1.22.0         IRanges_2.20.0             
-## [17] S4Vectors_0.24.0            BiocGenerics_0.32.0        
-## [19] scMerge_1.2.0              
+##  [1] tidyr_1.0.0                 scater_1.14.0              
+##  [3] scMerge_1.2.0               forcats_0.4.0              
+##  [5] stringr_1.4.0               scales_1.0.0               
+##  [7] DropletUtils_1.6.0          scClassify_0.2.0           
+##  [9] monocle_2.14.0              DDRTree_0.1.5              
+## [11] irlba_2.3.3                 VGAM_1.1-1                 
+## [13] Matrix_1.2-17               plyr_1.8.4                 
+## [15] ggpubr_0.2.3                magrittr_1.5               
+## [17] viridis_0.5.1               viridisLite_0.3.0          
+## [19] MAST_1.12.0                 ggplot2_3.2.1              
+## [21] cluster_2.1.0               Rtsne_0.15                 
+## [23] mclust_5.4.5                scdney_0.1.5               
+## [25] edgeR_3.28.0                limma_3.42.0               
+## [27] dplyr_0.8.3                 SingleCellExperiment_1.8.0 
+## [29] SummarizedExperiment_1.16.0 DelayedArray_0.12.0        
+## [31] BiocParallel_1.20.0         matrixStats_0.55.0         
+## [33] Biobase_2.46.0              GenomicRanges_1.38.0       
+## [35] GenomeInfoDb_1.22.0         IRanges_2.20.0             
+## [37] S4Vectors_0.24.0            BiocGenerics_0.32.0        
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] nlme_3.1-141             bitops_1.0-6            
-##  [3] RColorBrewer_1.1-2       numDeriv_2016.8-1.1     
-##  [5] tools_3.6.1              backports_1.1.5         
-##  [7] R6_2.4.0                 irlba_2.3.3             
-##  [9] vipor_0.4.5              rpart_4.1-15            
-## [11] KernSmooth_2.23-16       Hmisc_4.2-0             
-## [13] lazyeval_0.2.2           mgcv_1.8-29             
-## [15] colorspace_1.4-1         nnet_7.3-12             
-## [17] withr_2.1.2              tidyselect_0.2.5        
-## [19] gridExtra_2.3            compiler_3.6.1          
-## [21] BiocNeighbors_1.4.0      htmlTable_1.13.2        
-## [23] labeling_0.3             caTools_1.17.1.2        
-## [25] scales_1.0.0             checkmate_1.9.4         
-## [27] sfsmisc_1.1-4            proxy_0.4-23            
-## [29] stringr_1.4.0            digest_0.6.22           
-## [31] foreign_0.8-72           rmarkdown_1.16          
-## [33] XVector_0.26.0           base64enc_0.1-3         
-## [35] pkgconfig_2.0.3          htmltools_0.4.0         
-## [37] ruv_0.9.7.1              bbmle_1.0.20            
-## [39] htmlwidgets_1.5.1        rlang_0.4.1             
-## [41] rstudioapi_0.10          DelayedMatrixStats_1.8.0
-## [43] gtools_3.8.1             acepack_1.4.1           
-## [45] RCurl_1.95-4.12          BiocSingular_1.2.0      
-## [47] GenomeInfoDbData_1.2.2   Formula_1.2-3           
-## [49] Matrix_1.2-17            ggbeeswarm_0.6.0        
-## [51] Rcpp_1.0.2               munsell_0.5.0           
-## [53] viridis_0.5.1            distr_2.8.0             
-## [55] lifecycle_0.1.0          stringi_1.4.3           
-## [57] yaml_2.2.0               MASS_7.3-51.4           
-## [59] zlibbioc_1.32.0          Rtsne_0.15              
-## [61] gplots_3.0.1.1           grid_3.6.1              
-## [63] gdata_2.18.0             M3Drop_1.12.0           
-## [65] reldist_1.6-6            crayon_1.3.4            
-## [67] lattice_0.20-38          cowplot_1.0.0           
-## [69] splines_3.6.1            startupmsg_0.9.6        
-## [71] zeallot_0.1.0            knitr_1.25              
-## [73] pillar_1.4.2             igraph_1.2.4.1          
-## [75] ggsignif_0.6.0           glue_1.3.1              
-## [77] evaluate_0.14            latticeExtra_0.6-28     
-## [79] data.table_1.12.6        vctrs_0.2.0             
-## [81] gtable_0.3.0             purrr_0.3.3             
-## [83] assertthat_0.2.1         xfun_0.10               
-## [85] rsvd_1.0.2               viridisLite_0.3.0       
-## [87] survival_2.44-1.1        tibble_2.1.3            
-## [89] beeswarm_0.2.3           cluster_2.1.0           
-## [91] statmod_1.4.32           ellipsis_0.3.0</code></pre>
+##   [1] ModelMetrics_1.2.2       R.methodsS3_1.7.1       
+##   [3] acepack_1.4.1            knitr_1.25              
+##   [5] R.utils_2.9.0            data.table_1.12.6       
+##   [7] rpart_4.1-15             RCurl_1.95-4.12         
+##   [9] doParallel_1.0.15        generics_0.0.2          
+##  [11] snow_0.4-3               cowplot_1.0.0           
+##  [13] mice_3.6.0               RANN_2.6.1              
+##  [15] combinat_0.0-8           proxy_0.4-23            
+##  [17] lubridate_1.7.4          assertthat_0.2.1        
+##  [19] gower_0.2.1              amap_0.8-17             
+##  [21] xfun_0.10                evaluate_0.14           
+##  [23] fansi_0.4.0              caTools_1.17.1.2        
+##  [25] dendextend_1.12.0        igraph_1.2.4.1          
+##  [27] htmlwidgets_1.5.1        sparsesvd_0.2           
+##  [29] purrr_0.3.3              ellipsis_0.3.0          
+##  [31] backports_1.1.5          RcppParallel_4.4.4      
+##  [33] vctrs_0.2.0              abind_1.4-5             
+##  [35] caret_6.0-84             withr_2.1.2             
+##  [37] ggforce_0.3.1            sfsmisc_1.1-4           
+##  [39] checkmate_1.9.4          segmented_1.0-0         
+##  [41] lazyeval_0.2.2           crayon_1.3.4            
+##  [43] recipes_0.1.7            pkgconfig_2.0.3         
+##  [45] slam_0.1-45              labeling_0.3            
+##  [47] tweenr_1.0.1             vipor_0.4.5             
+##  [49] nlme_3.1-141             hopach_2.46.0           
+##  [51] nnet_7.3-12              rlang_0.4.1             
+##  [53] diptest_0.75-7           lifecycle_0.1.0         
+##  [55] mitml_0.3-7              startupmsg_0.9.6        
+##  [57] doSNOW_1.0.18            rsvd_1.0.2              
+##  [59] randomForest_4.6-14      polyclip_1.10-0         
+##  [61] Rhdf5lib_1.8.0           boot_1.3-23             
+##  [63] beeswarm_0.2.3           pan_1.6                 
+##  [65] base64enc_0.1-3          ggridges_0.5.1          
+##  [67] pheatmap_1.0.12          bitops_1.0-6            
+##  [69] R.oo_1.22.0              KernSmooth_2.23-16      
+##  [71] DelayedMatrixStats_1.8.0 ggsignif_0.6.0          
+##  [73] gplots_3.0.1.1           gdata_2.18.0            
+##  [75] zlibbioc_1.32.0          compiler_3.6.1          
+##  [77] HSMMSingleCell_1.5.0     dqrng_0.2.1             
+##  [79] bbmle_1.0.20             RColorBrewer_1.1-2      
+##  [81] lme4_1.1-21              cli_1.1.0               
+##  [83] XVector_0.26.0           htmlTable_1.13.2        
+##  [85] Formula_1.2-3            MASS_7.3-51.4           
+##  [87] mgcv_1.8-29              tidyselect_0.2.5        
+##  [89] stringi_1.4.3            highr_0.8               
+##  [91] densityClust_0.3         yaml_2.2.0              
+##  [93] BiocSingular_1.2.0       locfit_1.5-9.1          
+##  [95] latticeExtra_0.6-28      ggrepel_0.8.1           
+##  [97] pbmcapply_1.5.0          grid_3.6.1              
+##  [99] tools_3.6.1              ruv_0.9.7.1             
+## [101] rstudioapi_0.10          foreach_1.4.7           
+## [103] foreign_0.8-72           gridExtra_2.3           
+## [105] prodlim_2018.04.18       farver_1.1.0            
+## [107] ggraph_2.0.0             proxyC_0.1.5            
+## [109] digest_0.6.22            distr_2.8.0             
+## [111] FNN_1.1.3                lava_1.6.6              
+## [113] qlcMatrix_0.9.7          Rcpp_1.0.2              
+## [115] broom_0.5.2              minpack.lm_1.2-1        
+## [117] colorspace_1.4-1         reldist_1.6-6           
+## [119] statmod_1.4.32           expm_0.999-4            
+## [121] graphlayouts_0.5.0       nloptr_1.2.1            
+## [123] tidygraph_1.1.2          timeDate_3043.102       
+## [125] M3Drop_1.12.0            zeallot_0.1.0           
+## [127] ipred_0.9-9              R6_2.4.0                
+## [129] clusteval_0.1            Hmisc_4.2-0             
+## [131] pillar_1.4.2             htmltools_0.4.0         
+## [133] glue_1.3.1               minqa_1.2.4             
+## [135] BiocNeighbors_1.4.0      class_7.3-15            
+## [137] codetools_0.2-16         jomo_2.6-9              
+## [139] mvtnorm_1.0-11           utf8_1.1.4              
+## [141] lattice_0.20-38          tibble_2.1.3            
+## [143] mixtools_1.1.0           numDeriv_2016.8-1.1     
+## [145] ggbeeswarm_0.6.0         DescTools_0.99.29       
+## [147] gtools_3.8.1             survival_2.44-1.1       
+## [149] rmarkdown_1.16           docopt_0.6.1            
+## [151] fastICA_1.2-2            munsell_0.5.0           
+## [153] e1071_1.7-2              rhdf5_2.30.0            
+## [155] GenomeInfoDbData_1.2.2   iterators_1.0.12        
+## [157] HDF5Array_1.14.0         reshape2_1.4.3          
+## [159] gtable_0.3.0</code></pre>
 </div>
 
 

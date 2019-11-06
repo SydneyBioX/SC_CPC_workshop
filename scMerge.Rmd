@@ -61,7 +61,7 @@ This is perhaps a good place to clarify the terminology **data sources** and **b
 
 For the purpose of efficient data management, the bioinformatics community uses a `SingleCellExperiment` object to store single cell data. We have saved the Su and Yang data as two separate RDS files and we will read these data in first.
 
-Note: In the scMerge publication, we have merged [four mouse liver datasets](https://sydneybiox.github.io/scMerge/articles/case_study/Mouse_Liver_Data.html) together. This data is a bit too large for us to work with in this workshop, hence, we will only mearge the Su and Yang datasets.
+Note: In the scMerge publication, we have merged [four mouse liver datasets](https://sydneybiox.github.io/scMerge/articles/case_study/Mouse_Liver_Data.html) together. This data is a bit too large for us to work with in this workshop, hence, we will only merge the Su and Yang datasets.
 
 
 ```{r}
@@ -103,7 +103,7 @@ sce_combine
 You can learn more about `SingleCellExperiment` objects [here](http://bioconductor.org/packages/release/bioc/html/SingleCellExperiment.html). In brief terms, in a `SingleCellExperiment` object, it stores three things:
 
 + `colData` which stores information about the cells
-+ `rowData` which stores infornatin about the genes
++ `rowData` which stores information about the genes
 + `assayData` which stores a matrix of single cell expression data
 
 In the Yang data, the cell type `Hepatoblast` is coded as `hepatoblast/hepatocyte`. In order to correct for this, we will briefly manipulate the `colData`. You do not need to know precise details of what is happening, please just copy and paste this code.
@@ -190,7 +190,7 @@ ggpubr::ggarrange(tsne_logcounts_cellTypes,
 
 We will begin running `scMerge` with a simple example.
 
-Remember that one of our evaluation metric is to bring the Hepatoblast cells from these two batches to be closer to each other. The way that `scMerge` achieves this is to consider cells that are similar to each other to be **pseudo-replicates** of each other. In our example, that means we should consider Hepatoblast cells from the Su dataset to be pseudo-replicates of the Hepatoblast cells in the Yang dataset. Once this is established, we can consider the noise that exists between these two groups of Hepatoblast cells to be the noise that we should remove from the data. This noise is estimated from the Stably Expressed Genes (SEGs), which is a list of genes that we have found to be highly expressed and stable across multiple datasets. Ultimately, we remove this noise component from the data and arrive at a merged dataset.
+Remember that one of our evaluation metrics is to bring the Hepatoblast cells from these two batches to be closer to each other. The way that `scMerge` achieves this is to consider cells that are similar to each other to be **pseudo-replicates** of each other. In our example, that means we should consider Hepatoblast cells from the Su dataset to be pseudo-replicates of the Hepatoblast cells in the Yang dataset. Once this is established, we can consider the noise that exists between these two groups of Hepatoblast cells to be the noise that we should remove from the data. This noise is estimated from the Stably Expressed Genes (SEGs), which is a list of genes that we have found to be highly expressed and stable across multiple datasets. Ultimately, we remove this noise component from the data and arrive at a merged dataset.
 
 Other inputs of the `scMerge` function include
 
@@ -219,7 +219,7 @@ scMerge_supervised = scMerge(
 
 
 
-The output of the `scMerge` function is a `SingleCellExperiment` object with one extra assay, `scMerge_supervised`. And we can check the PCA visualisation to see if the merge is sensible.
+The output of the `scMerge` function is a `SingleCellExperiment` object with one extra assay, `scMerge_supervised`. And we can check the TSNE visualisation to see if the merge is sensible.
 
 
 
@@ -252,7 +252,7 @@ ggpubr::ggarrange(tsne_scMerge_supervised_cellTypes,
 
 What if we do not have access to the cell type information? Can we still perform `scMerge`?
 
-The answer is yes! In the absence of true cell type information, `scMerge` will perform clustering in the background to assign the cells with cluster labels. These cluster labels closely mimick the true cell type labels and a similar merge performance can be attained.
+The answer is yes! In the absence of true cell type information, `scMerge` will perform clustering in the background to assign the cells with cluster labels. These cluster labels closely mimic the true cell type labels and a similar merge performance can be attained.
 
 
 Below is the code for the unsupervised version of `scMerge`. Instead of supplying the `cell_type` parameter, we will use the `kmeansK` parameter. The `kmeansK` parameter should be a vector that matches the number of batches in our `sce_combine` data (in this case, 2). The first number in `kmeansK` should be the number of expected cell types in the first batch (Su) and the second number should be the number of expected cell types in the second batch. In our case, we already know from the data table that there are 6 and 2 celltypes in the Su and Yang data respectively, hence we should specify `kmeansK = c(6, 2)`.

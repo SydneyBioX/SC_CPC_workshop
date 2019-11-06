@@ -7,6 +7,8 @@ output: html_document
 
 + This workshop is funded by Single Cell Plus grant. 
 
++ The cloud component of this workshop was supported by a Google Cloud Education Grant. 
+
 + The workshop is developed/adviced from the following members of the Sydney Precision Bioinformatics Group (in alphabetical order)
   
     * [Ms. Yue Cao](https://sydney.edu.au/science/people/yue.cao.644.php)
@@ -18,3 +20,4 @@ output: html_document
     * [Prof. Jean Yang](https://sydney.edu.au/science/people/jean.yang.php)
     * [Dr. Pengyi Yang](https://sydney.edu.au/science/people/pengyi.yang.php)
 
+We also would like to thank [Mr. Andy Tran](https://sydney.edu.au/science/about/our-people/research-students/andy-tran-312.html) for proof-reading the materials. 
